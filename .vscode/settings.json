@@ -1,0 +1,87 @@
+{
+  "files.exclude": {
+    "**/._*": true,
+    "**/*.pyc": {
+      "when": "$(basename).py"
+    },
+    ".mypy_cache": true,
+    "**/__pycache__": true,
+    ".run": true,
+    ".pytest_cache": true,
+    ".cache": true,
+    ".dist": true,
+    "**/.pytest_cache": true,
+    "site": true,
+    ".angular": true,
+    ".ruff_cache": true,
+    ".unasyncd_cache": true,
+    ".coverage": true,
+    "coverage": true,
+    ".terraform": true,
+    "tmp": false,
+    "scratch": true,
+    ".static": true,
+    "dist": false,
+    ".dmypy.json": true
+  },
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "editor.formatOnSave": true,
+  "files.watcherExclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "search.exclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "files.readonlyInclude": {
+    "**/routeTree.gen.ts": true
+  },
+  "notebook.formatOnSave.enabled": true,
+  "evenBetterToml.formatter.reorderKeys": true,
+  "evenBetterToml.formatter.trailingNewline": true,
+  "evenBetterToml.formatter.columnWidth": 120,
+  "evenBetterToml.formatter.arrayAutoCollapse": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.ruff": "explicit",
+    "source.organizeImports.ruff": "explicit",
+  },
+  "terminal.integrated.allowChords": false,
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4,
+    "editor.trimAutoWhitespace": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    }
+  },
+  "python.analysis.fixAll": ["source.unusedImports", "source.convertImportFormat"],
+  "python.testing.unittestEnabled": false,
+  "python.analysis.supportDocstringTemplate": true,
+  "python.analysis.supportRestructuredText": true,
+  "python.analysis.regenerateStdLibIndices": true,
+  "python.analysis.showOnlyDirectDependenciesInAutoImport": false,
+  "python.analysis.includeAliasesFromUserFiles": true,
+  "python.analysis.generateWithTypeAnnotation": true,
+  "python.terminal.activateEnvInCurrentTerminal": true,
+  "python.terminal.executeInFileDir": true,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.autoFormatStrings": true,
+  "ruff.configuration": "${workspaceFolder}/pyproject.toml",
+  "ruff.nativeServer": "auto",
+  "ruff.lint.preview": true,
+  "ruff.format.preview": true,
+  "ruff.lineLength": 120,
+  "ruff.lint.extendSelect": ["ALL"],
+  "ruff.lint.select": ["ALL"],
+  "ruff.configurationPreference": "filesystemFirst",
+  "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest",
+  "python.testing.pytestEnabled": true,
+  "python.testing.cwd": "${workspaceFolder}/src/py/tests",
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+  "python.analysis.autoSearchPaths": true,
+  "python.analysis.extraPaths": ["${workspaceFolder}/src/py"],
+  "makefile.configureOnOpen": false,
+}

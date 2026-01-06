@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "litestar-start"
+version = "0.1.0a1"
+description = "Interactive CLI to scaffold fullstack projects with modular choices"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = [
+    "litestar",
+    "scaffolding",
+    "cli",
+    "fullstack",
+    "template",
+    "generator",
+]
+authors = [{ name = "Harshal Laheri", email = "harshal@harshallaheri.me" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Code Generators",
+]
+dependencies = [
+    "questionary>=2.1.1",
+    "rich>=14.2.0",
+    "copier>=9.11.0",
+    "typer>=0.21.1",
+]
+
+[project.scripts]
+litestar-start = "litestar_start.cli:main"
+
+[project.urls]
+Documentation = "https://github.com/youruser/litestar-start#readme"
+Issues = "https://github.com/youruser/litestar-start/issues"
+Source = "https://github.com/youruser/litestar-start"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/litestar_start"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/templates"]
+
+
+[tool.ruff]
+line-length = 120
+lint.ignore = ["CPY001", "D100"]
+
+[dependency-groups]
+dev = ["pre-commit>=4.5.1"]
