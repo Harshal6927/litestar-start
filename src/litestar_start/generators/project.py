@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import shutil
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from rich.console import Console
@@ -46,12 +44,9 @@ class ProjectOrchestrator:
         # Generate root files
         self._generate_root_files()
 
-        # Generate infrastructure
+        # Generate docker-compose if docker enabled
         if self.config.has_docker:
-            self._generate_docker(context)
-
-        if self.config.has_cicd:
-            self._generate_cicd(context)
+            self._generate_docker_compose()
 
         console.print(f"[dim]Generated project at {self.output_dir}[/dim]")
 
@@ -71,33 +66,22 @@ class ProjectOrchestrator:
         )
 
     def _generate_backend(self, context: GeneratorContext) -> None:
-        """Generate backend code.
-
-        Args:
-            context: Generator context.
-
-        """
+        """Generate backend code."""
         backend_gen_class = GeneratorRegistry.get_backend(self.config.backend)
         if backend_gen_class:
             backend_gen = backend_gen_class()
             backend_gen.generate(context)
         else:
-            console.print(f"[yellow]Warning: No generator found for backend '{self.config.backend}'[/yellow]")
-            self._generate_fallback_backend(context)
+            console.print(f"[red]Error: No generator found for backend '{self.config.backend}'[/red]")
 
     def _generate_frontend(self, context: GeneratorContext) -> None:
-        """Generate frontend code.
-
-        Args:
-            context: Generator context.
-
-        """
+        """Generate frontend code."""
         frontend_gen_class = GeneratorRegistry.get_frontend(self.config.frontend)
         if frontend_gen_class:
             frontend_gen = frontend_gen_class()
             frontend_gen.generate(context)
         else:
-            console.print(f"[yellow]Warning: No generator found for frontend '{self.config.frontend}'[/yellow]")
+            console.print(f"[red]Error: No generator found for frontend '{self.config.frontend}'[/red]")
 
     def _generate_root_files(self) -> None:
         """Generate root project files."""
@@ -107,197 +91,197 @@ class ProjectOrchestrator:
 
     def _generate_gitignore(self) -> None:
         """Generate .gitignore file."""
-        gitignore_content = (
-            "# Python\n"
-            "__pycache__/\n"
-            "*.py[cod]\n"
-            "*$py.class\n"
-            "*.so\n"
-            ".Python\n"
-            "venv/\n"
-            ".venv/\n"
-            "ENV/\n"
-            ".env\n"
-            "uv.lock\n\n"
-            "# Node\n"
-            "node_modules/\n"
-            "dist/\n"
-            ".cache/\n\n"
-            "# IDE\n"
-            ".idea/\n"
-            ".vscode/\n"
-            "*.swp\n"
-            "*.swo\n\n"
-            "# OS\n"
-            ".DS_Store\n"
-            "Thumbs.db\n\n"
-            "# Project\n"
-            "*.log\n"
-            ".coverage\n"
-            "htmlcov/\n"
-        )
+        gitignore_content = """\
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+ENV/
+.env
+uv.lock
+
+# Node
+node_modules/
+dist/
+.cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project
+*.log
+.coverage
+htmlcov/
+"""
         write_file(self.output_dir / ".gitignore", gitignore_content)
 
     def _generate_env_example(self) -> None:
         """Generate .env.example file."""
-        templates_dir = Path(__file__).parent / "templates"
-        env_template = templates_dir / ".env.example"
+        env_lines = [
+            f"# {self.config.project_name} Environment Variables",
+            "",
+            "# Application",
+            f"APP_NAME={self.config.project_slug}",
+            "APP_ENV=development",
+            "DEBUG=true",
+            "",
+            "# Database",
+        ]
 
-        if env_template.exists():
-            template_content = env_template.read_text()
+        db_urls = {
+            "postgresql": f"DATABASE_URL=postgresql://user:password@localhost:5432/{self.config.project_slug}",
+            "mysql": f"DATABASE_URL=mysql://user:password@localhost:3306/{self.config.project_slug}",
+            "sqlite": "DATABASE_URL=sqlite:///./app.db",
+            "mongodb": f"MONGODB_URL=mongodb://localhost:27017/{self.config.project_slug}",
+        }
 
-            # Simple template substitution
-            rendered = template_content
-            rendered = rendered.replace("{{ project_name }}", self.config.project_name)
-            rendered = rendered.replace("{{ project_slug }}", self.config.project_slug)
+        if self.config.database in db_urls:
+            env_lines.append(db_urls[self.config.database])
 
-            write_file(self.output_dir / ".env.example", rendered)
-        else:
-            # Fallback to old env generation
-            env_lines = [
-                f"# {self.config.project_name} Environment Variables",
-                "",
-                "# Application",
-                f"APP_NAME={self.config.project_slug}",
-                "APP_ENV=development",
-                "DEBUG=true",
-                "",
-                "# Database",
-            ]
+        env_lines.extend(["", "# Authentication"])
+        if self.config.has_auth:
+            env_lines.append("SECRET_KEY=your-secret-key-here")
+        if self.config.auth == "jwt":
+            env_lines.append("JWT_SECRET=your-jwt-secret-here")
 
-            db_urls = {
-                "postgresql": f"DATABASE_URL=postgresql://user:password@localhost:5432/{self.config.project_slug}",
-                "mysql": f"DATABASE_URL=mysql://user:password@localhost:3306/{self.config.project_slug}",
-                "sqlite": "DATABASE_URL=sqlite:///./app.db",
-                "mongodb": f"MONGODB_URL=mongodb://localhost:27017/{self.config.project_slug}",
-            }
-
-            if self.config.database in db_urls:
-                env_lines.append(db_urls[self.config.database])
-
-            env_lines.extend(["", "# Authentication"])
-            if self.config.has_auth:
-                env_lines.append("SECRET_KEY=your-secret-key-here")
-            if self.config.auth == "jwt":
-                env_lines.append("JWT_SECRET=your-jwt-secret-here")
-
-            write_file(self.output_dir / ".env.example", "\n".join(env_lines) + "\n")
+        write_file(self.output_dir / ".env.example", "\n".join(env_lines) + "\n")
 
     def _generate_readme(self) -> None:
         """Generate README.md file."""
-        templates_dir = Path(__file__).parent / "templates"
-        readme_template = templates_dir / "README.md"
+        frontend_text = self.config.frontend.title() if self.config.has_frontend else "None (API only)"
+        auth_text = self.config.auth.title() if self.config.has_auth else "None"
 
-        if readme_template.exists():
-            template_content = readme_template.read_text()
+        readme_lines = [
+            f"# {self.config.project_name}",
+            "",
+            self.config.description,
+            "",
+            "## Tech Stack",
+            "",
+            f"- **Backend**: {self.config.backend.title()}",
+            f"- **Frontend**: {frontend_text}",
+            f"- **Database**: {self.config.database.title()}",
+            f"- **ORM**: {self.config.orm.title()}",
+            f"- **Auth**: {auth_text}",
+            "",
+            "## Getting Started",
+            "",
+            "### Backend",
+            "",
+            "```bash",
+            "cd backend",
+            "uv sync",
+            "uv run uvicorn app.main:app --reload",
+            "```",
+        ]
 
-            # Simple template substitution
-            rendered = template_content
-            rendered = rendered.replace("{{ project_name }}", self.config.project_name)
-            rendered = rendered.replace("{{ project_slug }}", self.config.project_slug)
-            rendered = rendered.replace("{{ description }}", self.config.description)
-            rendered = rendered.replace("{{ backend }}", self.config.backend.title())
-            rendered = rendered.replace("{{ frontend }}", self.config.frontend if self.config.has_frontend else "none")
-            rendered = rendered.replace("{{ database }}", self.config.database)
-            rendered = rendered.replace("{{ license }}", "MIT")
+        if self.config.has_frontend:
+            readme_lines.extend(
+                [
+                    "",
+                    "### Frontend",
+                    "",
+                    "```bash",
+                    "cd frontend",
+                    "npm install",
+                    "npm run dev",
+                    "```",
+                ]
+            )
 
-            write_file(self.output_dir / "README.md", rendered)
-        else:
-            # Fallback to old README generation
-            frontend_text = self.config.frontend.title() if self.config.has_frontend else "None (API only)"
-            auth_text = self.config.auth.title() if self.config.has_auth else "None"
+        readme_lines.extend(["", "## License", "", "MIT"])
 
-            readme_lines = [
-                f"# {self.config.project_name}",
-                "",
-                self.config.description,
-                "",
-                "## Tech Stack",
-                "",
-                f"- **Backend**: {self.config.backend.title()}",
-                f"- **Frontend**: {frontend_text}",
-                f"- **Database**: {self.config.database.title()}",
-                f"- **ORM**: {self.config.orm.title()}",
-                f"- **Auth**: {auth_text}",
-                "",
-                "## Getting Started",
-                "",
-                "### Backend",
-                "",
-                "```bash",
-                "cd backend",
-                "uv sync",
-                "uv run uvicorn app.main:app --reload",
-                "```",
+        write_file(self.output_dir / "README.md", "\n".join(readme_lines) + "\n")
+
+    def _generate_docker_compose(self) -> None:
+        """Generate docker-compose.yml file."""
+        compose_lines = [
+            "services:",
+            "  backend:",
+            "    build:",
+            "      context: ./backend",
+            "      dockerfile: Dockerfile",
+            "    ports:",
+            '      - "8000:8000"',
+            "    environment:",
+            "      - APP_ENV=development",
+        ]
+
+        if self.config.database not in {"sqlite", "none"}:
+            compose_lines.extend(
+                [
+                    "    depends_on:",
+                    "      - db",
+                ]
+            )
+
+        compose_lines.extend(
+            [
+                "    volumes:",
+                "      - ./backend:/app",
             ]
-
-            if self.config.has_frontend:
-                readme_lines.extend(
-                    [
-                        "",
-                        "### Frontend",
-                        "",
-                        "```bash",
-                        "cd frontend",
-                        "npm install",
-                        "npm run dev",
-                        "```",
-                    ],
-                )
-
-            readme_lines.extend(["", "## License", "", "MIT"])
-
-            write_file(self.output_dir / "README.md", "\n".join(readme_lines) + "\n")
-
-    def _generate_docker(self, context: GeneratorContext) -> None:
-        """Generate Docker files.
-
-        Args:
-            context: Generator context.
-
-        """
-        templates_dir = Path(__file__).parent / "templates"
-        docker_compose_template = templates_dir / "docker-compose.yml"
-
-        if docker_compose_template.exists():
-            template_content = docker_compose_template.read_text()
-
-            # Simple template substitution (replace with proper templating engine if needed)
-            rendered = template_content
-            rendered = rendered.replace("{{ project_slug }}", context.project_slug)
-            rendered = rendered.replace("{{ database }}", self.config.database)
-            rendered = rendered.replace("{{ frontend }}", self.config.frontend)
-
-            write_file(self.output_dir / "docker-compose.yml", rendered)
-
-        # Copy GitHub Actions workflows if templates exist
-        workflows_template_dir = templates_dir / ".github" / "workflows"
-        if workflows_template_dir.exists():
-            workflows_dir = self.output_dir / ".github" / "workflows"
-            ensure_dir(workflows_dir)
-
-            for workflow_file in workflows_template_dir.glob("*.yml"):
-                shutil.copy2(workflow_file, workflows_dir / workflow_file.name)
-
-    def _generate_cicd(self, context: GeneratorContext) -> None:
-        """Generate CI/CD files.
-
-        Args:
-            context: Generator context.
-
-        """
-        # CI/CD is now handled in _generate_docker
-
-    def _generate_fallback_backend(self, _context: GeneratorContext) -> None:
-        """Generate minimal backend structure when no generator is available."""
-        backend_dir = self.output_dir / "backend"
-        ensure_dir(backend_dir)
-
-        app_dir = backend_dir / "app"
-        ensure_dir(app_dir)
-
-        write_file(app_dir / "__init__.py", '"""Backend application."""\n')
-        write_file(
-            app_dir / "main.py",
-            f'"""Main application entry point."""\n\nprint("Welcome to {self.config.project_name}!")\n',
         )
+
+        if self.config.has_frontend:
+            compose_lines.extend(
+                [
+                    "",
+                    "  frontend:",
+                    "    build:",
+                    "      context: ./frontend",
+                    "      dockerfile: Dockerfile",
+                    "    ports:",
+                    '      - "3000:3000"',
+                    "    volumes:",
+                    "      - ./frontend:/app",
+                    "      - /app/node_modules",
+                ]
+            )
+
+        if self.config.database == "postgresql":
+            compose_lines.extend(
+                [
+                    "",
+                    "  db:",
+                    "    image: postgres:16-alpine",
+                    "    environment:",
+                    "      POSTGRES_USER: postgres",
+                    "      POSTGRES_PASSWORD: postgres",
+                    f"      POSTGRES_DB: {self.config.project_slug}",
+                    "    ports:",
+                    '      - "5432:5432"',
+                    "    volumes:",
+                    "      - postgres_data:/var/lib/postgresql/data",
+                    "",
+                    "volumes:",
+                    "  postgres_data:",
+                ]
+            )
+        elif self.config.database == "mongodb":
+            compose_lines.extend(
+                [
+                    "",
+                    "  db:",
+                    "    image: mongo:7",
+                    "    ports:",
+                    '      - "27017:27017"',
+                    "    volumes:",
+                    "      - mongo_data:/data/db",
+                    "",
+                    "volumes:",
+                    "  mongo_data:",
+                ]
+            )
+
+        write_file(self.output_dir / "docker-compose.yml", "\n".join(compose_lines) + "\n")

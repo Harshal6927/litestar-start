@@ -6,8 +6,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
-    from litestar_start.core.base import BaseGenerator
-    from litestar_start.core.plugin import PluginInterface
+    from litestar_start.core.base import BaseGenerator, PluginInterface
 
 
 class GeneratorRegistry:

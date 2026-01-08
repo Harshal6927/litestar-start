@@ -14,7 +14,3 @@ def register_all_generators() -> None:
 
     # Register frontends
     GeneratorRegistry.register_frontend(ReactGenerator)
-
-    # TODO: Register plugins when needed
-    # from litestar_start.backends.fastapi.plugins.sqlalchemy import SQLAlchemyPlugin
-    # GeneratorRegistry.register_plugin("fastapi", SQLAlchemyPlugin)

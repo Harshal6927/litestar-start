@@ -66,7 +66,7 @@ To add a new backend (e.g., Flask) or frontend (e.g., Vue):
 4.  **Register it**:
     Edit `src/litestar_start/generators/loader.py` (or wherever registration happens) to ensure your generator is loaded and registered in `GeneratorRegistry`.
 
-## 📝 Release Process
+## Release Process
 
 1.  Ensure all changes are committed.
 2.  Run the release script:
