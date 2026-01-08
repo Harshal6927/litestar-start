@@ -2,19 +2,26 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from litestar_start.backends.base import BackendGenerator
+from litestar_start.core.templates import TemplateLoader
 from litestar_start.core.utils import ensure_dir, write_file
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from litestar_start.core.base import GeneratorContext
 
 
 class FastAPIGenerator(BackendGenerator):
     """Generator for FastAPI backend projects."""
+
+    def __init__(self) -> None:
+        """Initialize the FastAPI generator."""
+        super().__init__()
+        self.template_loader = TemplateLoader()
+        # Register FastAPI-specific templates
+        self.template_loader.register_template_dir("fastapi", Path(__file__).parent / "templates")
 
     @property
     def name(self) -> str:
@@ -49,14 +56,20 @@ class FastAPIGenerator(BackendGenerator):
             context: Generator context.
 
         """
-        content = self._create_pyproject_content(
-            context.project_slug,
-            self.get_dependencies(),
-        )
+        template_context = {
+            "project_slug": context.project_slug,
+            "description": context.description,
+            "dependencies": self.get_dependencies(),
+        }
+        content = self.template_loader.render("fastapi:pyproject.toml.jinja", template_context)
         write_file(backend_dir / "pyproject.toml", content)
 
         # Create .python-version for uv
         write_file(backend_dir / ".python-version", "3.12\n")
+
+        # Create .gitignore
+        gitignore_content = self.template_loader.render("fastapi:gitignore.jinja", {})
+        write_file(backend_dir / ".gitignore", gitignore_content)
 
     def _generate_app_structure(self, backend_dir: Path, context: GeneratorContext) -> None:
         """Generate FastAPI application structure.
@@ -69,133 +82,30 @@ class FastAPIGenerator(BackendGenerator):
         app_dir = backend_dir / "app"
         ensure_dir(app_dir)
 
+        template_context = {
+            "project_name": context.project_name,
+            "project_slug": context.project_slug,
+            "description": context.description,
+        }
+
         # Create __init__.py
-        write_file(app_dir / "__init__.py", '"""FastAPI application package."""\n')
+        init_content = self.template_loader.render("fastapi:app/__init__.py.jinja", {})
+        write_file(app_dir / "__init__.py", init_content)
 
         # Create main.py
-        main_content = self._create_main_file(context)
+        main_content = self.template_loader.render("fastapi:app/main.py.jinja", template_context)
         write_file(app_dir / "main.py", main_content)
 
         # Create config.py
-        config_content = self._create_config_file(context)
+        config_content = self.template_loader.render("fastapi:app/config.py.jinja", template_context)
         write_file(app_dir / "config.py", config_content)
 
         # Create api directory
         api_dir = app_dir / "api"
         ensure_dir(api_dir)
-        write_file(api_dir / "__init__.py", '"""API routes package."""\n')
+        api_init_content = self.template_loader.render("fastapi:api/__init__.py.jinja", {})
+        write_file(api_dir / "__init__.py", api_init_content)
 
         # Create routes.py
-        routes_content = self._create_routes_file()
+        routes_content = self.template_loader.render("fastapi:api/routes.py.jinja", {})
         write_file(api_dir / "routes.py", routes_content)
-
-    @staticmethod
-    def _create_main_file(context: GeneratorContext) -> str:
-        """Create main.py content.
-
-        Args:
-            context: Generator context.
-
-        Returns:
-            Main.py file content.
-
-        """
-        return f'''"""FastAPI application entry point."""
-
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-from app.api.routes import router
-from app.config import settings
-
-app = FastAPI(
-    title="{context.project_name}",
-    description="{context.description}",
-    version="0.1.0",
-)
-
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Include routers
-app.include_router(router)
-
-
-@app.get("/")
-async def root() -> dict[str, str]:
-    """Root endpoint."""
-    return {{"message": "Welcome to {context.project_name}!"}}
-
-
-@app.get("/health")
-async def health() -> dict[str, str]:
-    """Health check endpoint."""
-    return {{"status": "healthy"}}
-'''
-
-    @staticmethod
-    def _create_config_file(context: GeneratorContext) -> str:
-        """Create config.py content.
-
-        Args:
-            context: Generator context.
-
-        Returns:
-            Config.py file content.
-
-        """
-        return f'''"""Application configuration."""
-
-from pydantic_settings import BaseSettings, SettingsConfigDict
-
-
-class Settings(BaseSettings):
-    """Application settings."""
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=True,
-    )
-
-    # Application
-    APP_NAME: str = "{context.project_slug}"
-    APP_ENV: str = "development"
-    DEBUG: bool = True
-
-    # CORS
-    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
-
-    # Database
-    DATABASE_URL: str = "sqlite:///./app.db"
-
-
-settings = Settings()
-'''
-
-    @staticmethod
-    def _create_routes_file() -> str:
-        """Create routes.py content.
-
-        Returns:
-            Routes.py file content.
-
-        """
-        return '''"""API routes."""
-
-from fastapi import APIRouter
-
-router = APIRouter(prefix="/api/v1")
-
-
-@router.get("/status")
-async def get_status() -> dict[str, str]:
-    """Get API status."""
-    return {"status": "ok", "version": "1.0.0"}
-'''

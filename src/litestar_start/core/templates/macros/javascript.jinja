@@ -1,0 +1,21 @@
+{# JavaScript code generation macros #}
+
+{% macro import_statement(module, names=none, default=none) -%}
+{% if default and names %}
+import {{ default }}, { {{ names | join(", ") }} } from "{{ module }}";
+{% elif default %}
+import {{ default }} from "{{ module }}";
+{% elif names %}
+import { {{ names | join(", ") }} } from "{{ module }}";
+{% else %}
+import "{{ module }}";
+{% endif %}
+{%- endmacro %}
+
+{% macro export_default(name) -%}
+export default {{ name }};
+{%- endmacro %}
+
+{% macro export_named(names) -%}
+export { {{ names | join(", ") }} };
+{%- endmacro %}

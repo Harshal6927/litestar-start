@@ -1,0 +1,55 @@
+"""FastAPI application entry point."""
+
+{% block imports %}
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.routes import router
+from app.config import settings
+{% endblock %}
+
+{% block app_config %}
+app = FastAPI(
+    title="{{ project_name }}",
+    description="{{ description }}",
+    version="0.1.0",
+)
+{% endblock %}
+
+{% block middleware %}
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+{% endblock %}
+
+{% block plugin_setup %}
+{# Plugins inject their setup code here #}
+{% endblock %}
+
+{% block routers %}
+# Include routers
+app.include_router(router)
+{% endblock %}
+
+{% block routes %}
+
+@app.get("/")
+async def root() -> dict[str, str]:
+    """Root endpoint."""
+    return {"message": "Welcome to {{ project_name }}!"}
+
+
+@app.get("/health")
+async def health() -> dict[str, str]:
+    """Health check endpoint."""
+    return {"status": "healthy"}
+{% endblock %}
+
+{% block lifespan %}
+{# Startup/shutdown handlers #}
+{% endblock %}

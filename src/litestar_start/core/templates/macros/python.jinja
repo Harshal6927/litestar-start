@@ -1,0 +1,31 @@
+{# Python code generation macros #}
+
+{% macro import_statement(module, names=none, alias=none) -%}
+{% if names %}
+from {{ module }} import {{ names | join(", ") }}
+{% elif alias %}
+import {{ module }} as {{ alias }}
+{% else %}
+import {{ module }}
+{% endif %}
+{%- endmacro %}
+
+{% macro function_def(name, params=[], return_type=none, async=false, docstring=none) -%}
+{% if async %}async {% endif %}def {{ name }}({{ params | join(", ") }}){% if return_type %} -> {{ return_type }}{% endif %}:
+{% if docstring %}
+    """{{ docstring }}"""
+{% endif %}
+{%- endmacro %}
+
+{% macro class_def(name, bases=[], docstring=none) -%}
+class {{ name }}{% if bases %}({{ bases | join(", ") }}){% endif %}:
+{% if docstring %}
+    """{{ docstring }}"""
+{% endif %}
+{%- endmacro %}
+
+{% macro dependency_list(deps) -%}
+{% for dep in deps | sort %}
+    "{{ dep }}",
+{% endfor %}
+{%- endmacro %}

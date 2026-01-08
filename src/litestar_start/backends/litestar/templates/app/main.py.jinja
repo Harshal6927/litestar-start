@@ -1,0 +1,38 @@
+"""Litestar application entry point."""
+
+{% block imports %}
+from litestar import Litestar, get
+from litestar.config.cors import CORSConfig
+from litestar.contrib.pydantic import PydanticPlugin
+
+from app.config import settings
+from app.controllers.base import base_controller
+{% endblock %}
+
+{% block routes %}
+
+@get("/")
+async def root() -> dict[str, str]:
+    """Root endpoint."""
+    return {"message": "Welcome to {{ project_name }}!"}
+
+
+@get("/health")
+async def health() -> dict[str, str]:
+    """Health check endpoint."""
+    return {"status": "healthy"}
+{% endblock %}
+
+{% block plugin_setup %}
+{# Plugins inject their setup code here #}
+{% endblock %}
+
+{% block app_config %}
+
+app = Litestar(
+    route_handlers=[root, health, base_controller],
+    cors_config=CORSConfig(allow_origins=settings.ALLOWED_ORIGINS),
+    plugins=[PydanticPlugin()],
+    debug=settings.DEBUG,
+)
+{% endblock %}

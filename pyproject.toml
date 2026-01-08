@@ -45,4 +45,4 @@ line-length = 120
 lint.ignore = ["CPY001", "D100"]
 
 [dependency-groups]
-dev = ["pre-commit>=4.5.1"]
+dev = ["pre-commit>=4.5.1", "pytest>=8.0.0"]

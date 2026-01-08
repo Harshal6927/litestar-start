@@ -2,19 +2,26 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from litestar_start.backends.base import BackendGenerator
+from litestar_start.core.templates import TemplateLoader
 from litestar_start.core.utils import ensure_dir, write_file
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from litestar_start.core.base import GeneratorContext
 
 
 class LitestarGenerator(BackendGenerator):
     """Generator for Litestar backend projects."""
+
+    def __init__(self) -> None:
+        """Initialize the Litestar generator."""
+        super().__init__()
+        self.template_loader = TemplateLoader()
+        # Register Litestar-specific templates
+        self.template_loader.register_template_dir("litestar", Path(__file__).parent / "templates")
 
     @property
     def name(self) -> str:
@@ -47,14 +54,20 @@ class LitestarGenerator(BackendGenerator):
             context: Generator context.
 
         """
-        content = self._create_pyproject_content(
-            context.project_slug,
-            self.get_dependencies(),
-        )
+        template_context = {
+            "project_slug": context.project_slug,
+            "description": context.description,
+            "dependencies": self.get_dependencies(),
+        }
+        content = self.template_loader.render("litestar:pyproject.toml.jinja", template_context)
         write_file(backend_dir / "pyproject.toml", content)
 
         # Create .python-version for uv
         write_file(backend_dir / ".python-version", "3.12\n")
+
+        # Create .gitignore
+        gitignore_content = self.template_loader.render("litestar:gitignore.jinja", {})
+        write_file(backend_dir / ".gitignore", gitignore_content)
 
     def _generate_app_structure(self, backend_dir: Path, context: GeneratorContext) -> None:
         """Generate Litestar application structure.
@@ -67,125 +80,30 @@ class LitestarGenerator(BackendGenerator):
         app_dir = backend_dir / "app"
         ensure_dir(app_dir)
 
+        template_context = {
+            "project_name": context.project_name,
+            "project_slug": context.project_slug,
+            "description": context.description,
+        }
+
         # Create __init__.py
-        write_file(app_dir / "__init__.py", '"""Litestar application package."""\n')
+        init_content = self.template_loader.render("litestar:app/__init__.py.jinja", {})
+        write_file(app_dir / "__init__.py", init_content)
 
         # Create main.py
-        main_content = self._create_main_file(context)
+        main_content = self.template_loader.render("litestar:app/main.py.jinja", template_context)
         write_file(app_dir / "main.py", main_content)
 
         # Create config.py
-        config_content = self._create_config_file(context)
+        config_content = self.template_loader.render("litestar:app/config.py.jinja", template_context)
         write_file(app_dir / "config.py", config_content)
 
         # Create controllers directory
         controllers_dir = app_dir / "controllers"
         ensure_dir(controllers_dir)
-        write_file(controllers_dir / "__init__.py", '"""API controllers package."""\n')
+        controllers_init_content = self.template_loader.render("litestar:controllers/__init__.py.jinja", {})
+        write_file(controllers_dir / "__init__.py", controllers_init_content)
 
         # Create base controller
-        controller_content = self._create_controller_file()
+        controller_content = self.template_loader.render("litestar:controllers/base.py.jinja", {})
         write_file(controllers_dir / "base.py", controller_content)
-
-    @staticmethod
-    def _create_main_file(context: GeneratorContext) -> str:
-        """Create main.py content.
-
-        Args:
-            context: Generator context.
-
-        Returns:
-            Main.py file content.
-
-        """
-        return f'''"""Litestar application entry point."""
-
-from litestar import Litestar, get
-from litestar.config.cors import CORSConfig
-from litestar.contrib.pydantic import PydanticPlugin
-
-from app.config import settings
-from app.controllers.base import base_controller
-
-
-@get("/")
-async def root() -> dict[str, str]:
-    """Root endpoint."""
-    return {{"message": "Welcome to {context.project_name}!"}}
-
-
-@get("/health")
-async def health() -> dict[str, str]:
-    """Health check endpoint."""
-    return {{"status": "healthy"}}
-
-
-app = Litestar(
-    route_handlers=[root, health, base_controller],
-    cors_config=CORSConfig(allow_origins=settings.ALLOWED_ORIGINS),
-    plugins=[PydanticPlugin()],
-    debug=settings.DEBUG,
-)
-'''
-
-    @staticmethod
-    def _create_config_file(context: GeneratorContext) -> str:
-        """Create config.py content.
-
-        Args:
-            context: Generator context.
-
-        Returns:
-            Config.py file content.
-
-        """
-        return f'''"""Application configuration."""
-
-from dataclasses import dataclass, field
-
-
-@dataclass
-class Settings:
-    """Application settings."""
-
-    # Application
-    APP_NAME: str = "{context.project_slug}"
-    APP_ENV: str = "development"
-    DEBUG: bool = True
-
-    # CORS
-    ALLOWED_ORIGINS: list[str] = field(default_factory=lambda: ["http://localhost:3000", "http://localhost:5173"])
-
-    # Database
-    DATABASE_URL: str = "sqlite:///./app.db"
-
-
-settings = Settings()
-'''
-
-    @staticmethod
-    def _create_controller_file() -> str:
-        """Create base controller content.
-
-        Returns:
-            Controller file content.
-
-        """
-        return '''"""Base API controller."""
-
-from litestar import Controller, get
-
-
-class BaseController(Controller):
-    """Base API controller."""
-
-    path = "/api/v1"
-
-    @get("/status")
-    async def get_status(self) -> dict[str, str]:
-        """Get API status."""
-        return {"status": "ok", "version": "1.0.0"}
-
-
-base_controller = BaseController
-'''
