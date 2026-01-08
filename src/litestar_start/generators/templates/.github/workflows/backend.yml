@@ -1,0 +1,72 @@
+name: Backend CI
+
+on:
+    push:
+        branches: [main, develop]
+        paths:
+            - "backend/**"
+            - ".github/workflows/backend.yml"
+    pull_request:
+        branches: [main, develop]
+        paths:
+            - "backend/**"
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install uv
+              uses: astral-sh/setup-uv@v3
+              with:
+                  version: "latest"
+
+            - name: Set up Python
+              run: uv python install 3.12
+
+            - name: Install dependencies
+              working-directory: backend
+              run: uv sync --frozen
+
+            - name: Run linting
+              working-directory: backend
+              run: uv run ruff check .
+
+            - name: Run formatting check
+              working-directory: backend
+              run: uv run ruff format --check .
+
+            - name: Run type checking
+              working-directory: backend
+              run: uv run mypy app
+
+            - name: Run tests
+              working-directory: backend
+              run: uv run pytest --cov=app --cov-report=xml --cov-report=term
+
+            - name: Upload coverage
+              uses: codecov/codecov-action@v4
+              with:
+                  file: backend/coverage.xml
+                  flags: backend
+                  fail_ci_if_error: true
+
+    build:
+        runs-on: ubuntu-latest
+        needs: test
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Build Docker image
+              working-directory: backend
+              run: docker build -t ${{ github.repository }}-backend:${{ github.sha }} .
+
+            - name: Test Docker image
+              run: |
+                  docker run -d -p 8000:8000 --name test-backend ${{ github.repository }}-backend:${{ github.sha }}
+                  sleep 5
+                  curl -f http://localhost:8000/health || exit 1
+                  docker stop test-backend

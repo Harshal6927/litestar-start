@@ -54,6 +54,8 @@ class ReactGenerator(FrontendGenerator):
                 "build": "vite build",
                 "preview": "vite preview",
                 "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+                "format": 'prettier --write "src/**/*.{js,jsx,css}"',
+                "format:check": 'prettier --check "src/**/*.{js,jsx,css}"',
             },
             "dependencies": {
                 "react": "^18.2.0",
@@ -63,10 +65,11 @@ class ReactGenerator(FrontendGenerator):
                 "@types/react": "^18.2.0",
                 "@types/react-dom": "^18.2.0",
                 "@vitejs/plugin-react": "^4.2.1",
-                "eslint": "^8.55.0",
+                "eslint": "^8.57.0",
                 "eslint-plugin-react": "^7.33.2",
                 "eslint-plugin-react-hooks": "^4.6.0",
                 "eslint-plugin-react-refresh": "^0.4.5",
+                "prettier": "^3.2.0",
                 "vite": "^5.0.0",
             },
         }
