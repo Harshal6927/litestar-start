@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
-    from litestar_start.core.base import BaseGenerator, PluginInterface
+    from litestar_start.core.base import BaseGenerator
+    from litestar_start.core.plugin import PluginInterface
 
 
 class GeneratorRegistry:
@@ -13,31 +15,39 @@ class GeneratorRegistry:
 
     _backends: ClassVar[dict[str, type[BaseGenerator]]] = {}
     _frontends: ClassVar[dict[str, type[BaseGenerator]]] = {}
-    _plugins: ClassVar[dict[str, dict[str, type[PluginInterface]]]] = {}
+    _plugins: ClassVar[dict[str, dict[str, type[PluginInterface]]]] = defaultdict(dict)
 
     @classmethod
-    def register_backend(cls, generator: type[BaseGenerator]) -> None:
-        """Register a backend generator.
+    def register_backend(cls, generator: type[BaseGenerator]) -> type[BaseGenerator]:
+        """Register a backend generator. Can be used as decorator.
 
         Args:
             generator: Backend generator class to register.
+
+        Returns:
+            The same generator class (for decorator usage).
 
         """
         # Instantiate to get the name property
         instance = generator()
         cls._backends[instance.name] = generator
+        return generator
 
     @classmethod
-    def register_frontend(cls, generator: type[BaseGenerator]) -> None:
-        """Register a frontend generator.
+    def register_frontend(cls, generator: type[BaseGenerator]) -> type[BaseGenerator]:
+        """Register a frontend generator. Can be used as decorator.
 
         Args:
             generator: Frontend generator class to register.
+
+        Returns:
+            The same generator class (for decorator usage).
 
         """
         # Instantiate to get the name property
         instance = generator()
         cls._frontends[instance.name] = generator
+        return generator
 
     @classmethod
     def get_backend(cls, name: str) -> type[BaseGenerator] | None:
@@ -66,39 +76,53 @@ class GeneratorRegistry:
         return cls._frontends.get(name)
 
     @classmethod
-    def list_backends(cls) -> list[str]:
-        """List all registered backend names.
+    def list_backends(cls) -> list[tuple[str, str]]:
+        """List all registered backends with display names.
 
         Returns:
-            List of backend generator names.
+            List of (name, display_name) tuples for all backends.
 
         """
-        return list(cls._backends.keys())
+        return [(instance.name, instance.display_name) for instance in (gen() for gen in cls._backends.values())]
 
     @classmethod
-    def list_frontends(cls) -> list[str]:
-        """List all registered frontend names.
+    def list_frontends(cls) -> list[tuple[str, str]]:
+        """List all registered frontends with display names.
 
         Returns:
-            List of frontend generator names.
+            List of (name, display_name) tuples for all frontends.
 
         """
-        return list(cls._frontends.keys())
+        return [(instance.name, instance.display_name) for instance in (gen() for gen in cls._frontends.values())]
 
     @classmethod
-    def register_plugin(cls, framework: str, plugin: type[PluginInterface]) -> None:
+    def register_plugin(cls, framework: str, plugin: type[PluginInterface]) -> type[PluginInterface]:
         """Register a plugin for a framework.
 
         Args:
             framework: Framework name (e.g., 'fastapi', 'litestar').
             plugin: Plugin class to register.
 
+        Returns:
+            The same plugin class (for decorator usage).
+
         """
-        if framework not in cls._plugins:
-            cls._plugins[framework] = {}
-        # Instantiate to get the name property
-        instance = plugin()
-        cls._plugins[framework][instance.name] = plugin
+        cls._plugins[framework][plugin.metadata.name] = plugin
+        return plugin
+
+    @classmethod
+    def get_plugins_by_category(cls, framework: str, category: str) -> list[type[PluginInterface]]:
+        """Get all plugins for a framework in a specific category.
+
+        Args:
+            framework: Framework name.
+            category: Plugin category ('orm', 'auth', 'cache', etc.).
+
+        Returns:
+            List of plugin classes in the specified category.
+
+        """
+        return [plugin for plugin in cls._plugins.get(framework, {}).values() if plugin.metadata.category == category]
 
     @classmethod
     def get_plugins_for(cls, framework: str, category: str | None = None) -> list[type[PluginInterface]]:
@@ -116,9 +140,24 @@ class GeneratorRegistry:
         plugins = list(framework_plugins.values())
 
         if category:
-            plugins = [p for p in plugins if p.category == category]
+            plugins = [p for p in plugins if p.metadata.category == category]
 
         return plugins
+
+    @classmethod
+    def list_plugins(cls, framework: str, category: str | None = None) -> list[tuple[str, str]]:
+        """List plugins for a framework with display names.
+
+        Args:
+            framework: Framework name.
+            category: Optional category filter.
+
+        Returns:
+            List of (name, display_name) tuples for plugins.
+
+        """
+        plugins = cls.get_plugins_for(framework, category)
+        return [(p.metadata.name, p.metadata.display_name) for p in plugins]
 
     @classmethod
     def get_plugin(cls, framework: str, plugin_name: str) -> type[PluginInterface] | None:

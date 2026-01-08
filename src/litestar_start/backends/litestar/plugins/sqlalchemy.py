@@ -1,4 +1,4 @@
-"""SQLAlchemy plugin for FastAPI."""
+"""SQLAlchemy plugin for Litestar."""
 
 from __future__ import annotations
 
@@ -8,18 +8,18 @@ from litestar_start.core.plugin import PluginFile, PluginInterface, PluginMetada
 
 
 class SQLAlchemyPlugin(PluginInterface):
-    """SQLAlchemy ORM integration for FastAPI."""
+    """SQLAlchemy ORM integration for Litestar using built-in plugin."""
 
     metadata = PluginMetadata(
         name="sqlalchemy",
         display_name="SQLAlchemy",
         category="orm",
-        description="SQL toolkit and ORM for Python",
-        requires=["database"],  # Requires a database plugin to be selected
+        description="SQLAlchemy via Litestar's built-in SQLAlchemy plugin",
+        requires=["database"],
     )
 
     def apply(self) -> PluginResult:
-        """Apply SQLAlchemy integration.
+        """Apply SQLAlchemy integration for Litestar.
 
         Returns:
             PluginResult with files, dependencies, and environment variables.
@@ -27,31 +27,31 @@ class SQLAlchemyPlugin(PluginInterface):
         """
         database = self.context.config.get("database", "postgresql")
 
-        # Database-specific driver
-        drivers = {
-            "postgresql": "psycopg2-binary>=2.9.9",
-            "mysql": "pymysql>=1.1.0",
-            "sqlite": "aiosqlite>=0.19.0",
-        }
-
+        # Litestar has different SQLAlchemy integration
         dependencies = [
-            "sqlalchemy>=2.0.0",
+            "litestar[sqlalchemy]",  # Uses Litestar's bundled plugin
             "alembic>=1.13.0",
-            drivers.get(database, ""),
         ]
+
+        # Add async driver
+        if database == "postgresql":
+            dependencies.append("asyncpg>=0.29.0")
+        elif database == "mysql":
+            dependencies.append("aiomysql>=0.2.0")
 
         files = [
             PluginFile(
-                path="app/db/base.py",
-                content=self._create_base_module(),
+                path="app/db/plugin.py",
+                content=self._create_plugin_config(),
             ),
             PluginFile(
-                path="app/db/session.py",
-                content=self._create_session_module(database),
+                path="app/db/models.py",
+                content=self._create_models_module(),
             ),
             PluginFile(
-                path="app/models/__init__.py",
-                content=self._create_models_init(),
+                path="app/main.py",
+                content=self._create_main_with_db(),
+                mode="replace",  # Replace the base main.py
             ),
             PluginFile(
                 path="alembic.ini",
@@ -61,37 +61,29 @@ class SQLAlchemyPlugin(PluginInterface):
                 path="alembic/env.py",
                 content=self._create_alembic_env(),
             ),
-            PluginFile(
-                path="app/core/deps.py",
-                content=self._create_deps_module(),
-                mode="merge",  # Merge with existing deps
-            ),
         ]
-
-        env_vars = {
-            "DATABASE_URL": self._get_database_url_template(database),
-        }
 
         return PluginResult(
             files=files,
-            dependencies=[d for d in dependencies if d],
-            env_vars=env_vars,
+            dependencies=dependencies,
+            env_vars={"DATABASE_URL": self._get_async_url(database)},
         )
 
-    def _get_database_url_template(self, database: str) -> str:
-        """Get database URL template.
+    def _get_async_url(self, database: str) -> str:
+        """Get async database URL template.
 
         Args:
             database: Database type.
 
         Returns:
-            Database URL template string.
+            Async database URL template string.
 
         """
+        # Litestar uses async drivers
         templates = {
-            "postgresql": "postgresql://user:password@localhost:5432/{project_slug}",
-            "mysql": "mysql://user:password@localhost:3306/{project_slug}",
-            "sqlite": "sqlite:///./app.db",
+            "postgresql": "postgresql+asyncpg://user:password@localhost:5432/{project_slug}",
+            "mysql": "mysql+aiomysql://user:password@localhost:3306/{project_slug}",
+            "sqlite": "sqlite+aiosqlite:///./app.db",
         }
         return templates.get(database, "").format(project_slug=self.context.project_slug)
 
@@ -104,77 +96,131 @@ class SQLAlchemyPlugin(PluginInterface):
         """
         return {
             "database": self.context.config.get("database"),
-            "async_mode": self.context.config.get("database") != "sqlite",
+            "project_name": self.context.project_name,
         }
 
     @staticmethod
-    def _create_base_module() -> str:
-        """Create database base module content.
+    def _create_plugin_config() -> str:
+        """Create Litestar SQLAlchemy plugin configuration.
 
         Returns:
-            Database base module content.
+            Plugin configuration content.
 
         """
-        return '''"""Database base configuration."""
+        return '''"""SQLAlchemy plugin configuration for Litestar."""
 
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-'''
-
-    @staticmethod
-    def _create_session_module(database: str) -> str:
-        """Create database session module content.
-
-        Args:
-            database: Database type.
-
-        Returns:
-            Database session module content.
-
-        """
-        return '''"""Database session management."""
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from advanced_alchemy.extensions.litestar import (
+    AlembicAsyncConfig,
+    AsyncSessionConfig,
+    SQLAlchemyAsyncConfig,
+    async_autocommit_before_send_handler,
+)
+from sqlalchemy.ext.asyncio import AsyncEngine
 
 from app.core.config import settings
 
-engine = create_engine(
-    settings.DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {},
-)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+def get_sqlalchemy_config() -> SQLAlchemyAsyncConfig:
+    """Get SQLAlchemy configuration for Litestar.
 
-
-def get_db():
-    """Get database session.
-
-    Yields:
-        Database session.
+    Returns:
+        SQLAlchemy configuration.
 
     """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    session_config = AsyncSessionConfig(expire_on_commit=False)
+
+    return SQLAlchemyAsyncConfig(
+        connection_string=settings.DATABASE_URL,
+        session_config=session_config,
+        before_send_handler=async_autocommit_before_send_handler,
+    )
+
+
+def get_alembic_config() -> AlembicAsyncConfig:
+    """Get Alembic configuration for Litestar.
+
+    Returns:
+        Alembic configuration.
+
+    """
+    return AlembicAsyncConfig(
+        config_file_path="alembic.ini",
+        script_config="alembic/",
+        version_table_name="alembic_version",
+    )
 '''
 
     @staticmethod
-    def _create_models_init() -> str:
-        """Create models __init__ module content.
+    def _create_models_module() -> str:
+        """Create models module content.
 
         Returns:
-            Models __init__ module content.
+            Models module content.
 
         """
-        return '''"""Database models package."""
+        return '''"""Database models."""
 
-from app.db.base import Base
+from advanced_alchemy.base import UUIDAuditBase
 
-__all__ = ["Base"]
+
+class Base(UUIDAuditBase):
+    """Base class for all database models."""
+
+    __abstract__ = True
+
+
+# Define your models here
+# Example:
+# class User(Base):
+#     __tablename__ = "users"
+#     name: Mapped[str]
+#     email: Mapped[str]
+'''
+
+    def _create_main_with_db(self) -> str:
+        """Create main.py with database integration.
+
+        Returns:
+            Main module content with database setup.
+
+        """
+        return '''"""Main application module."""
+
+from litestar import Litestar
+from litestar.contrib.sqlalchemy.plugins import SQLAlchemyInitPlugin
+
+from app.core.config import settings
+from app.db.plugin import get_sqlalchemy_config
+
+
+def create_app() -> Litestar:
+    """Create and configure the Litestar application.
+
+    Returns:
+        Configured Litestar application.
+
+    """
+    sqlalchemy_config = get_sqlalchemy_config()
+
+    return Litestar(
+        route_handlers=[],
+        debug=settings.DEBUG,
+        plugins=[SQLAlchemyInitPlugin(config=sqlalchemy_config)],
+    )
+
+
+app = create_app()
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+    )
 '''
 
     @staticmethod
@@ -272,22 +318,25 @@ datefmt = %H:%M:%S
 
     @staticmethod
     def _create_alembic_env() -> str:
-        """Create alembic env.py content.
+        """Create alembic env.py content for async SQLAlchemy.
 
         Returns:
             Alembic environment configuration.
 
         """
-        return '''"""Alembic migration environment."""
+        return '''"""Alembic migration environment for async SQLAlchemy."""
 
+import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import pool
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
 # Import your models' Base
-from app.db.base import Base
+from app.db.models import Base
 from app.core.config import settings
 
 # this is the Alembic Config object, which provides
@@ -336,58 +385,40 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+def do_run_migrations(connection: Connection) -> None:
+    """Run migrations with connection.
 
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
+    Args:
+        connection: Database connection.
 
     """
-    connectable = engine_from_config(
+    context.configure(connection=connection, target_metadata=target_metadata)
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+async def run_async_migrations() -> None:
+    """Run migrations in async mode."""
+    connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
 
-    with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
 
-        with context.begin_transaction():
-            context.run_migrations()
+    await connectable.dispose()
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode."""
+    asyncio.run(run_async_migrations())
 
 
 if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
-'''
-
-    @staticmethod
-    @staticmethod
-    def _create_deps_module() -> str:
-        """Create dependencies module content.
-
-        Returns:
-            Dependencies module content.
-
-        """
-        return '''"""FastAPI dependencies."""
-
-from typing import Generator
-
-from app.db.session import SessionLocal
-
-
-def get_db() -> Generator:
-    """Get database session.
-
-    Yields:
-        Database session.
-
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 '''

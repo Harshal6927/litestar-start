@@ -9,6 +9,7 @@ from rich.text import Text
 from litestar_start.core.config import ProjectConfig
 from litestar_start.generators.loader import register_all_generators
 from litestar_start.generators.project import ProjectOrchestrator
+from litestar_start.generators.registry import GeneratorRegistry
 
 console = Console()
 
@@ -23,19 +24,22 @@ def get_choices() -> dict[str, list[dict[str, str]]]:
         Dictionary mapping component names to their available choices.
 
     """
+    # Get backends and frontends from registry
+    backends = [
+        {"name": f"{display} - Modern web framework", "value": name}
+        for name, display in GeneratorRegistry.list_backends()
+    ]
+
+    frontends = [
+        {"name": f"{display} - Frontend framework", "value": name}
+        for name, display in GeneratorRegistry.list_frontends()
+    ]
+    frontends.append({"name": "None - Backend only (API)", "value": "none"})
+
+    # Static choices for now (can be extended with plugin categories)
     return {
-        "backend": [
-            {"name": "FastAPI - Modern, fast Python web framework", "value": "fastapi"},
-            {"name": "Django - Full-featured web framework with batteries included", "value": "django"},
-            {"name": "Flask - Lightweight and flexible micro-framework", "value": "flask"},
-            {"name": "Litestar - High-performance ASGI framework", "value": "litestar"},
-        ],
-        "frontend": [
-            {"name": "React - Popular UI library with large ecosystem", "value": "react"},
-            {"name": "Vue - Progressive JavaScript framework", "value": "vue"},
-            {"name": "Svelte - Compile-time reactive framework", "value": "svelte"},
-            {"name": "None - Backend only (API)", "value": "none"},
-        ],
+        "backend": backends,
+        "frontend": frontends,
         "database": [
             {"name": "PostgreSQL - Powerful open-source relational database", "value": "postgresql"},
             {"name": "MySQL - Popular relational database", "value": "mysql"},
@@ -158,6 +162,11 @@ def _prompt_path(prompt: str, default: str) -> str:
 def _get_orm_choices(choices: dict[str, list[dict[str, str]]], database: str, backend: str) -> list[dict[str, str]]:
     """Get ORM choices based on database and backend selection.
 
+    Args:
+        choices: All available choices.
+        database: Selected database.
+        backend: Selected backend.
+
     Returns:
         List of ORM choices appropriate for the selected database/backend.
 
@@ -170,6 +179,15 @@ def _get_orm_choices(choices: dict[str, list[dict[str, str]]], database: str, ba
         ]
     if backend == "django":
         return [{"name": "Django ORM - Built-in Django ORM", "value": "django_orm"}]
+
+    # Get ORM plugins from registry for the selected backend
+    orm_plugins = GeneratorRegistry.list_plugins(backend, category="orm")
+    if orm_plugins:
+        plugin_choices = [{"name": f"{display} - ORM plugin", "value": name} for name, display in orm_plugins]
+        plugin_choices.append({"name": "None - Raw SQL queries", "value": "none"})
+        return plugin_choices
+
+    # Fallback to static choices
     return choices["orm"]
 
 
