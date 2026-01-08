@@ -39,8 +39,7 @@ my-project/
 │   │   ├── models/
 │   │   ├── routes/
 │   │   └── auth/
-│   ├── pyproject.toml
-│   └── requirements.txt
+│   └── pyproject.toml
 ├── frontend/
 │   ├── src/
 │   ├── package.json

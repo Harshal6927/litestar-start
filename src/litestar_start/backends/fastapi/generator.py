@@ -44,8 +44,7 @@ class FastAPIGenerator(BackendGenerator):
             "fastapi>=0.109.0",
             "uvicorn[standard]>=0.27.0",
             "python-dotenv>=1.0.0",
-            "pydantic>=2.5.0",
-            "pydantic-settings>=2.1.0",
+            "msgspec>=0.20.0",
         ]
 
     def _generate_pyproject(self, backend_dir: Path, context: GeneratorContext) -> None:

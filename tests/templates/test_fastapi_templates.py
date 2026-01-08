@@ -35,9 +35,9 @@ class TestFastAPITemplates:
         """Test rendering FastAPI config.py template."""
         result = fastapi_loader.render("fastapi:app/config.py.jinja", base_context)
 
-        assert "from pydantic_settings import BaseSettings" in result
+        assert "import msgspec" in result
         assert 'APP_NAME: str = "test-project"' in result
-        assert "class Settings(BaseSettings)" in result
+        assert "class Settings(msgspec.Struct)" in result
 
     def test_render_pyproject_toml(self, fastapi_loader, backend_context):
         """Test rendering FastAPI pyproject.toml template."""

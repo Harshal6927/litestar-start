@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import msgspec
 
-@dataclass
-class ProjectConfig:
+
+class ProjectConfig(msgspec.Struct):
     """Project configuration model."""
 
     project_name: str
@@ -19,8 +19,8 @@ class ProjectConfig:
     database: str
     orm: str
     auth: str
-    features: list[str] = field(default_factory=list)
-    output_dir: Path = field(default_factory=Path)
+    features: list[str] = []
+    output_dir: Path = Path()
 
     @property
     def has_docker(self) -> bool:

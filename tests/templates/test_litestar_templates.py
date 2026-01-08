@@ -35,7 +35,7 @@ class TestLitestarTemplates:
         """Test rendering Litestar config.py template."""
         result = litestar_loader.render("litestar:app/config.py.jinja", base_context)
 
-        assert "from dataclasses import dataclass" in result
+        assert "import msgspec" in result
         assert 'APP_NAME: str = "test-project"' in result
         assert "class Settings" in result
 

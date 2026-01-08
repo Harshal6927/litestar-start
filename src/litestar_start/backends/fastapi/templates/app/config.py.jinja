@@ -1,16 +1,10 @@
 """Application configuration."""
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import msgspec
 
 
-class Settings(BaseSettings):
+class Settings(msgspec.Struct):
     """Application settings."""
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=True,
-    )
 
     # Application
     APP_NAME: str = "{{ project_slug }}"

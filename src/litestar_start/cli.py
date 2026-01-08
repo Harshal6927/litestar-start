@@ -290,9 +290,9 @@ def main() -> None:
         console.print(f"  cd {config['output_dir']}")
 
         if config["backend"] in {"fastapi", "flask", "litestar"}:
-            console.print("  pip install -r backend/requirements.txt")
+            console.print("  cd backend && pip install -e .")
         elif config["backend"] == "django":
-            console.print("  pip install -r requirements.txt")
+            console.print("  pip install -e .")
 
         if config["frontend"] != "none":
             console.print("  cd frontend && npm install")

@@ -235,9 +235,10 @@ def create_minimal_structure(output_dir: Path, config: dict[str, Any]) -> None:
 
     (app_dir / "main.py").write_text(main_content)
 
-    # Create requirements.txt
+    # Create pyproject.toml
     requirements = _get_requirements(config)
-    (backend_dir / "requirements.txt").write_text("\n".join(sorted(requirements)) + "\n")
+    pyproject_content = _get_pyproject_toml(config, requirements)
+    (backend_dir / "pyproject.toml").write_text(pyproject_content)
 
     # Create frontend if selected
     if config["frontend"] != "none":
@@ -414,11 +415,48 @@ def _get_requirements(config: dict[str, Any]) -> list[str]:
         Complete list of requirements.
 
     """
-    requirements = ["python-dotenv>=1.0.0"]
+    requirements = ["python-dotenv>=1.0.0", "msgspec>=0.20.0"]
     requirements.extend(_get_backend_requirements(config["backend"]))
     requirements.extend(_get_database_requirements(config["database"], config["orm"]))
     requirements.extend(_get_auth_requirements(config["auth"]))
     return requirements
+
+
+def _get_pyproject_toml(config: dict[str, Any], requirements: list[str]) -> str:
+    """Generate pyproject.toml content.
+
+    Returns:
+        Content for pyproject.toml file.
+
+    """
+    deps = "\n".join(f'    "{dep}",' for dep in sorted(requirements))
+    return f"""[project]
+name = "{config["project_slug"]}"
+version = "0.1.0"
+description = "{config["description"]}"
+requires-python = ">=3.12"
+dependencies = [
+{deps}
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+"""
 
 
 def _create_frontend(output_dir: Path, config: dict[str, Any]) -> None:
@@ -674,7 +712,7 @@ def _create_readme(output_dir: Path, config: dict[str, Any]) -> None:
         "cd backend",
         "python -m venv venv",
         "source venv/bin/activate  # On Windows: venv\\Scripts\\activate",
-        "pip install -r requirements.txt",
+        "pip install -e .",
     ]
 
     run_commands = {
@@ -726,8 +764,8 @@ def _create_docker_files(output_dir: Path, config: dict[str, Any]) -> None:
         "",
         "WORKDIR /app",
         "",
-        "COPY requirements.txt .",
-        "RUN pip install --no-cache-dir -r requirements.txt",
+        "COPY pyproject.toml .",
+        "RUN pip install --no-cache-dir -e .",
         "",
         "COPY . .",
         "",
@@ -866,7 +904,7 @@ def _create_cicd_files(output_dir: Path, config: dict[str, Any]) -> None:
         "      - name: Install dependencies",
         "        run: |",
         "          cd backend",
-        "          pip install -r requirements.txt",
+        "          pip install -e .",
     ]
 
     if config.get("testing"):

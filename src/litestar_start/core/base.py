@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
+
+import msgspec
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
-@dataclass
-class GeneratorContext:
+class GeneratorContext(msgspec.Struct):
     """Context passed to all generators."""
 
     project_name: str

@@ -12,7 +12,13 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Code Generators",
 ]
-dependencies = ["questionary>=2.1.1", "rich>=14.2.0", "jinja2>=3.1.6", "pydantic>=2.12.5"]
+dependencies = [
+    "questionary>=2.1.1",
+    "rich>=14.2.0",
+    "jinja2>=3.1.6",
+    "pydantic>=2.12.5",
+    "msgspec>=0.20.0",
+]
 description = "Interactive CLI to scaffold fullstack projects with modular choices"
 keywords = ["litestar", "scaffolding", "cli", "fullstack", "template", "generator"]
 license = "MIT"
@@ -45,4 +51,4 @@ line-length = 120
 lint.ignore = ["CPY001", "D100"]
 
 [dependency-groups]
-dev = ["pre-commit>=4.5.1", "pytest>=8.0.0"]
+dev = ["pre-commit>=4.5.1", "pytest>=9.0.2"]

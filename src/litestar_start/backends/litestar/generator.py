@@ -44,6 +44,7 @@ class LitestarGenerator(BackendGenerator):
             "litestar>=2.5.0",
             "uvicorn[standard]>=0.27.0",
             "python-dotenv>=1.0.0",
+            "msgspec>=0.20.0",
         ]
 
     def _generate_pyproject(self, backend_dir: Path, context: GeneratorContext) -> None:
