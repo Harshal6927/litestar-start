@@ -6,9 +6,14 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
-from litestar_start.generator import generate_project
+from litestar_start.core.config import ProjectConfig
+from litestar_start.generators.loader import register_all_generators
+from litestar_start.generators.project import ProjectOrchestrator
 
 console = Console()
+
+# Register all generators at module load time
+register_all_generators()
 
 
 def get_choices() -> dict[str, list[dict[str, str]]]:
@@ -257,7 +262,9 @@ def main() -> None:
 
         # Generate the project
         with console.status("[bold green]Generating project...", spinner="dots"):
-            generate_project(config)
+            config_obj = ProjectConfig.from_dict(config)
+            orchestrator = ProjectOrchestrator(config_obj)
+            orchestrator.generate()
 
         # Success message
         console.print("\n[bold green]✅ Project created successfully![/bold green]")
