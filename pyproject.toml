@@ -12,20 +12,14 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Code Generators",
 ]
-dependencies = [
-    "questionary>=2.1.1",
-    "rich>=14.2.0",
-    "jinja2>=3.1.6",
-    "pydantic>=2.12.5",
-    "msgspec>=0.20.0",
-]
+dependencies = ["questionary>=2.1.1", "rich>=14.2.0", "jinja2>=3.1.6", "pydantic>=2.12.5", "msgspec>=0.20.0"]
 description = "Interactive CLI to scaffold fullstack projects with modular choices"
 keywords = ["litestar", "scaffolding", "cli", "fullstack", "template", "generator"]
 license = "MIT"
 name = "litestar-start"
 readme = "README.md"
 requires-python = ">=3.10"
-version = "0.1.0a1"
+version = "0.1.0a2"
 
 [project.scripts]
 litestar-start = "litestar_start.cli:main"
