@@ -1,3 +1,4 @@
+import re
 import sys
 from typing import Any
 
@@ -30,16 +31,8 @@ def get_choices() -> dict[str, list[dict[str, str]]]:
         for name, display in GeneratorRegistry.list_backends()
     ]
 
-    frontends = [
-        {"name": f"{display} - Frontend framework", "value": name}
-        for name, display in GeneratorRegistry.list_frontends()
-    ]
-    frontends.append({"name": "None - Backend only (API)", "value": "none"})
-
-    # Static choices for now (can be extended with plugin categories)
     return {
         "backend": backends,
-        "frontend": frontends,
         "database": [
             {"name": "PostgreSQL - Powerful open-source relational database", "value": "postgresql"},
             {"name": "MySQL - Popular relational database", "value": "mysql"},
@@ -71,9 +64,9 @@ def display_banner() -> None:
     """Display the welcome banner."""
     banner = Text()
     banner.append("🚀 ", style="bold")
-    banner.append("Create Fullstack", style="bold blue")
-    banner.append(" - Interactive Project Scaffolding\n\n", style="dim")
-    banner.append("Generate a customized fullstack project with your preferred stack.", style="italic")
+    banner.append("Litestar Start", style="bold blue")
+    banner.append(" - Python Backend Scaffolding\n\n", style="dim")
+    banner.append("Generate a production-ready Python backend project.", style="italic")
 
     console.print(Panel(banner, border_style="blue", padding=(1, 2)))
     console.print()
@@ -89,7 +82,10 @@ def _prompt_text(prompt: str, default: str) -> str:
     result = questionary.text(
         prompt,
         default=default,
-        validate=lambda x: len(x) > 0 or "Value cannot be empty",
+        validate=lambda x: (
+            (len(x) > 0 and re.match(r"^[a-zA-Z0-9_-]+$", x) is not None)
+            or "Project name must contain only alphanumeric characters, hyphens, and underscores"
+        ),
     ).ask()
     if result is None:
         console.print("\n[yellow]Cancelled.[/yellow]")
@@ -206,7 +202,6 @@ def prompt_project_config() -> dict[str, Any]:
     project_name = _prompt_text("Project name:", "my-fullstack-app")
     description = _prompt_text_optional("Project description:", "A fullstack application")
     backend = _prompt_select("Backend framework:", choices["backend"])
-    frontend = _prompt_select("Frontend framework:", choices["frontend"])
     database = _prompt_select("Database:", choices["database"])
     orm_choices = _get_orm_choices(choices, database, backend)
     orm = _prompt_select("ORM / Database driver:", orm_choices)
@@ -219,7 +214,6 @@ def prompt_project_config() -> dict[str, Any]:
         "project_slug": project_name.lower().replace(" ", "-").replace("_", "-"),
         "description": description,
         "backend": backend,
-        "frontend": frontend,
         "database": database,
         "orm": orm,
         "auth": auth,
@@ -241,8 +235,6 @@ def display_summary(config: dict[str, Any]) -> None:
     summary.append(f"{config['project_name']}\n", style="bold cyan")
     summary.append("  Backend: ", style="dim")
     summary.append(f"{config['backend'].title()}\n", style="green")
-    summary.append("  Frontend: ", style="dim")
-    summary.append(f"{config['frontend'].title()}\n", style="green")
     summary.append("  Database: ", style="dim")
     summary.append(f"{config['database'].title()}\n", style="green")
     summary.append("  ORM: ", style="dim")
@@ -285,17 +277,13 @@ def main() -> None:
             orchestrator.generate()
 
         # Success message
+        # Success message
         console.print("\n[bold green]✅ Project created successfully![/bold green]")
         console.print("\n[dim]Next steps:[/dim]")
+
         console.print(f"  cd {config['output_dir']}")
-
-        if config["backend"] in {"fastapi", "flask", "litestar"}:
-            console.print("  cd backend && pip install -e .")
-        elif config["backend"] == "django":
-            console.print("  pip install -e .")
-
-        if config["frontend"] != "none":
-            console.print("  cd frontend && npm install")
+        console.print("  uv sync")
+        console.print("  uv run uvicorn app.main:app --reload")
 
         if config["docker"]:
             console.print("  docker-compose up -d")

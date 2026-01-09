@@ -24,7 +24,7 @@ class BackendGenerator(BaseGenerator):
             context: Generator context.
 
         """
-        backend_dir = context.output_dir / "backend"
+        backend_dir = context.output_dir
         ensure_dir(backend_dir)
 
         # Generate pyproject.toml

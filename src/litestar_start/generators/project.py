@@ -35,11 +35,8 @@ class ProjectOrchestrator:
         context = self._create_context()
 
         # Generate backend
+        # Generate backend
         self._generate_backend(context)
-
-        # Generate frontend if selected
-        if self.config.has_frontend:
-            self._generate_frontend(context)
 
         # Generate root files
         self._generate_root_files()
@@ -73,15 +70,6 @@ class ProjectOrchestrator:
             backend_gen.generate(context)
         else:
             console.print(f"[red]Error: No generator found for backend '{self.config.backend}'[/red]")
-
-    def _generate_frontend(self, context: GeneratorContext) -> None:
-        """Generate frontend code."""
-        frontend_gen_class = GeneratorRegistry.get_frontend(self.config.frontend)
-        if frontend_gen_class:
-            frontend_gen = frontend_gen_class()
-            frontend_gen.generate(context)
-        else:
-            console.print(f"[red]Error: No generator found for frontend '{self.config.frontend}'[/red]")
 
     def _generate_root_files(self) -> None:
         """Generate root project files."""
@@ -159,7 +147,6 @@ htmlcov/
 
     def _generate_readme(self) -> None:
         """Generate README.md file."""
-        frontend_text = self.config.frontend.title() if self.config.has_frontend else "None (API only)"
         auth_text = self.config.auth.title() if self.config.has_auth else "None"
 
         readme_lines = [
@@ -169,36 +156,18 @@ htmlcov/
             "",
             "## Tech Stack",
             "",
-            f"- **Backend**: {self.config.backend.title()}",
-            f"- **Frontend**: {frontend_text}",
+            f"- **Framework**: {self.config.backend.title()}",
             f"- **Database**: {self.config.database.title()}",
             f"- **ORM**: {self.config.orm.title()}",
             f"- **Auth**: {auth_text}",
             "",
             "## Getting Started",
             "",
-            "### Backend",
-            "",
             "```bash",
-            "cd backend",
             "uv sync",
             "uv run uvicorn app.main:app --reload",
             "```",
         ]
-
-        if self.config.has_frontend:
-            readme_lines.extend(
-                [
-                    "",
-                    "### Frontend",
-                    "",
-                    "```bash",
-                    "cd frontend",
-                    "npm install",
-                    "npm run dev",
-                    "```",
-                ]
-            )
 
         readme_lines.extend(["", "## License", "", "MIT"])
 
@@ -208,14 +177,15 @@ htmlcov/
         """Generate docker-compose.yml file."""
         compose_lines = [
             "services:",
-            "  backend:",
+            "  app:",
             "    build:",
-            "      context: ./backend",
+            "      context: .",
             "      dockerfile: Dockerfile",
             "    ports:",
             '      - "8000:8000"',
             "    environment:",
             "      - APP_ENV=development",
+            f"      - APP_NAME={self.config.project_slug}",
         ]
 
         if self.config.database not in {"sqlite", "none"}:
@@ -223,31 +193,15 @@ htmlcov/
                 [
                     "    depends_on:",
                     "      - db",
-                ]
+                ],
             )
 
         compose_lines.extend(
             [
                 "    volumes:",
-                "      - ./backend:/app",
-            ]
+                "      - .:/app",
+            ],
         )
-
-        if self.config.has_frontend:
-            compose_lines.extend(
-                [
-                    "",
-                    "  frontend:",
-                    "    build:",
-                    "      context: ./frontend",
-                    "      dockerfile: Dockerfile",
-                    "    ports:",
-                    '      - "3000:3000"',
-                    "    volumes:",
-                    "      - ./frontend:/app",
-                    "      - /app/node_modules",
-                ]
-            )
 
         if self.config.database == "postgresql":
             compose_lines.extend(
@@ -266,7 +220,7 @@ htmlcov/
                     "",
                     "volumes:",
                     "  postgres_data:",
-                ]
+                ],
             )
         elif self.config.database == "mongodb":
             compose_lines.extend(
@@ -281,7 +235,7 @@ htmlcov/
                     "",
                     "volumes:",
                     "  mongo_data:",
-                ]
+                ],
             )
 
         write_file(self.output_dir / "docker-compose.yml", "\n".join(compose_lines) + "\n")

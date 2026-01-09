@@ -13,7 +13,6 @@ class GeneratorRegistry:
     """Central registry for discovering generators and plugins."""
 
     _backends: ClassVar[dict[str, type[BaseGenerator]]] = {}
-    _frontends: ClassVar[dict[str, type[BaseGenerator]]] = {}
     _plugins: ClassVar[dict[str, dict[str, type[PluginInterface]]]] = defaultdict(dict)
 
     @classmethod
@@ -33,22 +32,6 @@ class GeneratorRegistry:
         return generator
 
     @classmethod
-    def register_frontend(cls, generator: type[BaseGenerator]) -> type[BaseGenerator]:
-        """Register a frontend generator. Can be used as decorator.
-
-        Args:
-            generator: Frontend generator class to register.
-
-        Returns:
-            The same generator class (for decorator usage).
-
-        """
-        # Instantiate to get the name property
-        instance = generator()
-        cls._frontends[instance.name] = generator
-        return generator
-
-    @classmethod
     def get_backend(cls, name: str) -> type[BaseGenerator] | None:
         """Get a backend generator by name.
 
@@ -62,19 +45,6 @@ class GeneratorRegistry:
         return cls._backends.get(name)
 
     @classmethod
-    def get_frontend(cls, name: str) -> type[BaseGenerator] | None:
-        """Get a frontend generator by name.
-
-        Args:
-            name: Frontend generator name.
-
-        Returns:
-            Frontend generator class or None if not found.
-
-        """
-        return cls._frontends.get(name)
-
-    @classmethod
     def list_backends(cls) -> list[tuple[str, str]]:
         """List all registered backends with display names.
 
@@ -83,16 +53,6 @@ class GeneratorRegistry:
 
         """
         return [(instance.name, instance.display_name) for instance in (gen() for gen in cls._backends.values())]
-
-    @classmethod
-    def list_frontends(cls) -> list[tuple[str, str]]:
-        """List all registered frontends with display names.
-
-        Returns:
-            List of (name, display_name) tuples for all frontends.
-
-        """
-        return [(instance.name, instance.display_name) for instance in (gen() for gen in cls._frontends.values())]
 
     @classmethod
     def register_plugin(cls, framework: str, plugin: type[PluginInterface]) -> type[PluginInterface]:
@@ -106,7 +66,8 @@ class GeneratorRegistry:
             The same plugin class (for decorator usage).
 
         """
-        cls._plugins[framework][plugin.metadata.name] = plugin
+        instance = plugin()
+        cls._plugins[framework][instance.name] = plugin
         return plugin
 
     @classmethod
@@ -121,7 +82,7 @@ class GeneratorRegistry:
             List of plugin classes in the specified category.
 
         """
-        return [plugin for plugin in cls._plugins.get(framework, {}).values() if plugin.metadata.category == category]
+        return [plugin for plugin in cls._plugins.get(framework, {}).values() if plugin().category == category]
 
     @classmethod
     def get_plugins_for(cls, framework: str, category: str | None = None) -> list[type[PluginInterface]]:
@@ -139,7 +100,7 @@ class GeneratorRegistry:
         plugins = list(framework_plugins.values())
 
         if category:
-            plugins = [p for p in plugins if p.metadata.category == category]
+            plugins = [p for p in plugins if p().category == category]
 
         return plugins
 
@@ -156,7 +117,7 @@ class GeneratorRegistry:
 
         """
         plugins = cls.get_plugins_for(framework, category)
-        return [(p.metadata.name, p.metadata.display_name) for p in plugins]
+        return [(p().name, p().display_name) for p in plugins]
 
     @classmethod
     def get_plugin(cls, framework: str, plugin_name: str) -> type[PluginInterface] | None:
@@ -176,5 +137,4 @@ class GeneratorRegistry:
     def clear(cls) -> None:
         """Clear all registrations. Primarily for testing."""
         cls._backends.clear()
-        cls._frontends.clear()
         cls._plugins.clear()

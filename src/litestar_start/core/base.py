@@ -68,6 +68,12 @@ class PluginInterface(ABC):
 
     @property
     @abstractmethod
+    def display_name(self) -> str:
+        """Human-readable name for CLI display."""
+        ...
+
+    @property
+    @abstractmethod
     def category(self) -> str:
         """Plugin category: 'orm', 'auth', 'cache', etc."""
         ...

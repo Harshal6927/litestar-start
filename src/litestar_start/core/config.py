@@ -15,7 +15,6 @@ class ProjectConfig(msgspec.Struct):
     project_slug: str
     description: str
     backend: str
-    frontend: str
     database: str
     orm: str
     auth: str
@@ -43,11 +42,6 @@ class ProjectConfig(msgspec.Struct):
         return "linting" in self.features
 
     @property
-    def has_frontend(self) -> bool:
-        """Check if frontend is enabled."""
-        return self.frontend != "none"
-
-    @property
     def has_auth(self) -> bool:
         """Check if authentication is enabled."""
         return self.auth != "none"
@@ -64,7 +58,6 @@ class ProjectConfig(msgspec.Struct):
             "project_slug": self.project_slug,
             "description": self.description,
             "backend": self.backend,
-            "frontend": self.frontend,
             "database": self.database,
             "orm": self.orm,
             "auth": self.auth,
@@ -95,7 +88,6 @@ class ProjectConfig(msgspec.Struct):
             project_slug=data.get("project_slug", data["project_name"].lower().replace(" ", "-")),
             description=data.get("description", ""),
             backend=data["backend"],
-            frontend=data.get("frontend", "none"),
             database=data.get("database", "sqlite"),
             orm=data.get("orm", "none"),
             auth=data.get("auth", "none"),
