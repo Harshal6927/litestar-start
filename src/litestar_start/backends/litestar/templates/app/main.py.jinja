@@ -21,7 +21,7 @@ async def health() -> dict[str, str]:
 {% block app_config %}
 
 app = Litestar(
-    route_handlers=[health, base_controller],
+    route_handlers=[health, BaseController],
     cors_config=CORSConfig(allow_origins=settings.ALLOWED_ORIGINS),
     debug=settings.DEBUG,
 )
