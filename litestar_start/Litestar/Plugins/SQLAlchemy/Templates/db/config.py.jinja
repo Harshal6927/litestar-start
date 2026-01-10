@@ -1,0 +1,29 @@
+"""Database configuration."""
+
+from advanced_alchemy.extensions.litestar import (
+    AlembicAsyncConfig,
+    AsyncSessionConfig,
+    SQLAlchemyAsyncConfig,
+    SQLAlchemyPlugin,
+)
+
+from app.config import settings
+
+# Session configuration
+session_config = AsyncSessionConfig(expire_on_commit=False)
+
+# SQLAlchemy configuration
+sqlalchemy_config = SQLAlchemyAsyncConfig(
+    connection_string=settings.DATABASE_URL,
+    session_config=session_config,
+    create_all=True,  # Set to False in production, use Alembic migrations
+)
+
+# Alembic configuration for migrations
+alembic_config = AlembicAsyncConfig(
+    script_config="migrations/alembic.ini",
+    version_table_name="alembic_version",
+)
+
+# Create the plugin
+db_plugin = SQLAlchemyPlugin(config=sqlalchemy_config)

@@ -1,0 +1,31 @@
+"""Database models."""
+
+from datetime import datetime
+from uuid import UUID
+
+from advanced_alchemy.base import UUIDAuditBase
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+
+class Base(DeclarativeBase):
+    """Base class for all models."""
+
+    pass
+
+
+class TimestampMixin:
+    """Mixin that adds created_at and updated_at timestamps."""
+
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# Example model - remove or modify as needed
+class Item(UUIDAuditBase):
+    """Example item model."""
+
+    __tablename__ = "items"
+
+    name: Mapped[str] = mapped_column(index=True)
+    description: Mapped[str | None] = mapped_column(default=None)
+    is_active: Mapped[bool] = mapped_column(default=True)

@@ -1,0 +1,78 @@
+"""Application configuration."""
+
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+
+def _get_bool(key: str, default: bool = False) -> bool:
+    """Get a boolean from environment."""
+    value = os.getenv(key, str(default)).lower()
+    return value in ("true", "1", "yes", "on")
+
+
+def _get_int(key: str, default: int) -> int:
+    """Get an integer from environment."""
+    return int(os.getenv(key, str(default)))
+
+
+@dataclass
+class Settings:
+    """Application settings."""
+
+    # Application
+    APP_NAME: str = field(default_factory=lambda: os.getenv("APP_NAME", "{{ project_name }}"))
+    APP_ENV: str = field(default_factory=lambda: os.getenv("APP_ENV", "development"))
+    DEBUG: bool = field(default_factory=lambda: _get_bool("DEBUG", True))
+
+    # Server
+    HOST: str = field(default_factory=lambda: os.getenv("HOST", "0.0.0.0"))
+    PORT: int = field(default_factory=lambda: _get_int("PORT", 8000))
+
+{% if has_database %}
+    # Database
+{% if database.value == "PostgreSQL" %}
+    DATABASE_URL: str = field(
+        default_factory=lambda: os.getenv(
+            "DATABASE_URL",
+            "postgresql+asyncpg://myuser:mypassword@localhost:5432/mydb"
+        )
+    )
+{% elif database.value == "SQLite" %}
+    DATABASE_URL: str = field(
+        default_factory=lambda: os.getenv(
+            "DATABASE_URL",
+            "sqlite+aiosqlite:///./app.db"
+        )
+    )
+{% elif database.value == "MySQL" %}
+    DATABASE_URL: str = field(
+        default_factory=lambda: os.getenv(
+            "DATABASE_URL",
+            "mysql+asyncmy://myuser:mypassword@localhost:3306/mydb"
+        )
+    )
+{% endif %}
+{% endif %}
+
+{% if has_jwt %}
+    # JWT
+    JWT_SECRET: str = field(
+        default_factory=lambda: os.getenv("JWT_SECRET", "your-super-secret-key-change-in-production")
+    )
+    JWT_ALGORITHM: str = field(default_factory=lambda: os.getenv("JWT_ALGORITHM", "HS256"))
+    JWT_EXPIRATION_MINUTES: int = field(default_factory=lambda: _get_int("JWT_EXPIRATION_MINUTES", 60))
+{% endif %}
+
+    @property
+    def is_production(self) -> bool:
+        """Check if running in production."""
+        return self.APP_ENV == "production"
+
+
+settings = Settings()

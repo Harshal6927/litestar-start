@@ -1,0 +1,41 @@
+"""Litestar application factory."""
+
+from litestar import Litestar, get
+from litestar.openapi import OpenAPIConfig
+
+from app.config import settings
+{% if has_sqlalchemy %}
+from db.config import db_plugin
+{% endif %}
+{% if has_jwt %}
+from auth.guards import jwt_auth
+{% endif %}
+
+
+@get("/")
+async def index() -> dict[str, str]:
+    """Root endpoint."""
+    return {"message": "Hello, World!", "app": settings.APP_NAME}
+
+
+@get("/health")
+async def health() -> dict[str, str]:
+    """Health check endpoint."""
+    return {"status": "healthy"}
+
+
+app = Litestar(
+    route_handlers=[index, health],
+    openapi_config=OpenAPIConfig(
+        title=settings.APP_NAME,
+        version="0.1.0",
+        path="/schema",
+    ),
+    debug=settings.DEBUG,
+{% if has_sqlalchemy %}
+    plugins=[db_plugin],
+{% endif %}
+{% if has_jwt %}
+    on_app_init=[jwt_auth.on_app_init],
+{% endif %}
+)

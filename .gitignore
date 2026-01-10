@@ -9,5 +9,6 @@ wheels/
 # Virtual environments
 .venv
 .tmp
+
 .github/prompts
 docs/prd

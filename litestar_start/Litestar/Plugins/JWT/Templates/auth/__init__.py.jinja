@@ -1,0 +1,6 @@
+"""Authentication module."""
+
+from auth.guards import jwt_auth
+from auth.schemas import TokenPayload, UserLogin, UserToken
+
+__all__ = ["TokenPayload", "UserLogin", "UserToken", "jwt_auth"]

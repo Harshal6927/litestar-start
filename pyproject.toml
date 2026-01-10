@@ -19,7 +19,7 @@ license = "MIT"
 name = "litestar-start"
 readme = "README.md"
 requires-python = ">=3.10"
-version = "0.1.0a5"
+version = "0.1.0a6"
 
 [project.scripts]
 litestar-start = "litestar_start.cli:main"
@@ -34,15 +34,21 @@ build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/litestar_start"]
+packages = ["litestar_start"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src", "/templates"]
-
+include = ["litestar_start"]
 
 [tool.ruff]
 line-length = 120
-lint.ignore = ["CPY001", "D100", "PLR0911"]
+lint.ignore = [
+    "CPY001",  # Missing copyright notice
+    "D100",    # Undocumented public module
+    "D203",    # One blank line required before class docstring (conflicts with D211)
+    "D213",    # Multi-line docstring summary should start at the second line (conflicts with D212)
+    "PLC0415", # Import outside top level
+    "PLR0911", # Too many return statements
+]
 
 [dependency-groups]
-dev = ["pre-commit>=4.5.1"]
+dev = ["pre-commit>=4.5.1", "ruff>=0.14.11"]
