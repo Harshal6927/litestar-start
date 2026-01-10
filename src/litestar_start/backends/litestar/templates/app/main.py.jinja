@@ -3,7 +3,7 @@ from litestar import Litestar, get
 from litestar.config.cors import CORSConfig
 
 from app.config import settings
-from app.controllers.base import base_controller
+from app.controllers import BaseController
 {% endblock %}
 
 {% block routes %}

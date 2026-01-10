@@ -102,7 +102,7 @@ class TemplateLoader:
 
         env = Environment(
             loader=PrefixLoader(loaders, delimiter=":"),
-            autoescape=False,  # We're generating code, not HTML
+            autoescape=False,  # We're generating code, not HTML  # noqa: S701
             keep_trailing_newline=True,
             trim_blocks=True,
             lstrip_blocks=True,

@@ -89,7 +89,6 @@ venv/
 .venv/
 ENV/
 .env
-uv.lock
 
 # Node
 node_modules/
