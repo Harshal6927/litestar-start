@@ -2,7 +2,7 @@
 name = "{{ project_slug }}"
 version = "0.1.0"
 description = "{{ description }}"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
 {% for dep in dependencies | sort %}
     "{{ dep }}",
@@ -20,7 +20,7 @@ packages = ["app"]
 line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = ["ALL"]
 ignore = []
 
 [tool.pytest.ini_options]

@@ -5,8 +5,6 @@ from litestar_start.generators.loader import register_all_generators
 from litestar_start.generators.project import ProjectOrchestrator
 from litestar_start.generators.registry import GeneratorRegistry
 
-__version__ = "0.1.0a3"
-
 __all__ = [
     "GeneratorRegistry",
     "ProjectConfig",

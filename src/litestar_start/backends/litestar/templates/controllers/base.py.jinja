@@ -1,5 +1,3 @@
-"""Base API controller."""
-
 from litestar import Controller, get
 
 
@@ -11,7 +9,4 @@ class BaseController(Controller):
     @get("/status")
     async def get_status(self) -> dict[str, str]:
         """Get API status."""
-        return {"status": "ok", "version": "1.0.0"}
-
-
-base_controller = BaseController
+        return {"status": "ok"}

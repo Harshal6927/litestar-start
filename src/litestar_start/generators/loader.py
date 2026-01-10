@@ -8,5 +8,5 @@ from litestar_start.generators.registry import GeneratorRegistry
 def register_all_generators() -> None:
     """Register all available generators."""
     # Register backends
-    GeneratorRegistry.register_backend(FastAPIGenerator)
     GeneratorRegistry.register_backend(LitestarGenerator)
+    GeneratorRegistry.register_backend(FastAPIGenerator)

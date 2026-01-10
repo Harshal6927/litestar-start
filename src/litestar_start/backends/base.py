@@ -71,7 +71,8 @@ class BackendGenerator(BaseGenerator):
         """
         # Plugin application will be implemented when plugins are created
 
-    def _copy_template_files(self, backend_dir: Path, context: GeneratorContext) -> None:
+    @staticmethod
+    def _copy_template_files(backend_dir: Path, context: GeneratorContext) -> None:
         """Copy template files to backend directory.
 
         Args:

@@ -41,10 +41,8 @@ class LitestarGenerator(BackendGenerator):
 
         """
         return [
-            "litestar>=2.5.0",
-            "uvicorn[standard]>=0.27.0",
-            "python-dotenv>=1.0.0",
-            "msgspec>=0.20.0",
+            "litestar[standard]>=2.19.0",
+            "python-dotenv>=1.2.1",
         ]
 
     def _generate_pyproject(self, backend_dir: Path, context: GeneratorContext) -> None:
@@ -64,7 +62,7 @@ class LitestarGenerator(BackendGenerator):
         write_file(backend_dir / "pyproject.toml", content)
 
         # Create .python-version for uv
-        write_file(backend_dir / ".python-version", "3.12\n")
+        write_file(backend_dir / ".python-version", "3.13\n")
 
         # Create .gitignore
         gitignore_content = self.template_loader.render("litestar:gitignore.jinja", {})

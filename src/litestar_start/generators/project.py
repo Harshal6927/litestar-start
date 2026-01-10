@@ -35,7 +35,6 @@ class ProjectOrchestrator:
         context = self._create_context()
 
         # Generate backend
-        # Generate backend
         self._generate_backend(context)
 
         # Generate root files
