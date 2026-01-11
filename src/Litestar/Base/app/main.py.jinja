@@ -29,7 +29,7 @@ app = Litestar(
     openapi_config=OpenAPIConfig(
         title=settings.APP_NAME,
         version="0.1.0",
-        path="/schema",
+        path="/api",
     ),
     debug=settings.DEBUG,
 {% if has_sqlalchemy %}

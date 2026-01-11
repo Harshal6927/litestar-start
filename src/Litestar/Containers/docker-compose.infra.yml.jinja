@@ -1,7 +1,7 @@
 services:
 {% if database.value == "PostgreSQL" %}
   postgres:
-    image: postgres:17-alpine
+    image: postgres:18.1
     container_name: {{ project_slug }}_postgres
     environment:
       POSTGRES_DB: mydb
@@ -22,7 +22,7 @@ volumes:
   postgres_data: {}
 {% elif database.value == "MySQL" %}
   mysql:
-    image: mysql:8.0
+    image: mysql:lts-oraclelinux9
     container_name: {{ project_slug }}_mysql
     environment:
       MYSQL_DATABASE: mydb

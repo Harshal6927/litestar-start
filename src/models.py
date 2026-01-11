@@ -81,10 +81,10 @@ class DatabaseConfig(msgspec.Struct):
         """
         configs = {
             Database.POSTGRESQL: cls(
-                driver="postgresql+asyncpg",
+                driver="postgresql+psycopg",
                 port=5432,
-                default_url="postgresql+asyncpg://myuser:mypassword@localhost:5432/mydb",
-                docker_image="postgres:17-alpine",
+                default_url="postgresql+psycopg://myuser:mypassword@localhost:5432/mydb",
+                docker_image="postgres:18.1",
             ),
             Database.SQLITE: cls(
                 driver="sqlite+aiosqlite",
@@ -96,7 +96,7 @@ class DatabaseConfig(msgspec.Struct):
                 driver="mysql+asyncmy",
                 port=3306,
                 default_url="mysql+asyncmy://myuser:mypassword@localhost:3306/mydb",
-                docker_image="mysql:8.0",
+                docker_image="mysql:lts-oraclelinux9",
             ),
         }
         return configs.get(db)

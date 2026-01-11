@@ -11,9 +11,9 @@ dependencies = [
     "sqlalchemy>=2.0.0",
     "advanced-alchemy>=0.31.0",
 {% if database.value == "PostgreSQL" %}
-    "asyncpg>=0.30.0",
+    "psycopg[binary,pool]>=3.3.2",
 {% elif database.value == "SQLite" %}
-    "aiosqlite>=0.21.0",
+    "aiosqlite>=0.22.1",
 {% elif database.value == "MySQL" %}
     "asyncmy>=0.2.10",
 {% endif %}
