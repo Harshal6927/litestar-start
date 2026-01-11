@@ -4,6 +4,7 @@ lint:
 	@echo "Running linters... 🔄"
 	pre-commit install
 	pre-commit run -a
+	ty check
 	@echo "Linters completed. ✅"
 
 release:

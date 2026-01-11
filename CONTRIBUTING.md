@@ -1,4 +1,4 @@
-# Litestar Start - Architecture Documentation
+# Litestar Start
 
 This document explains the architecture and design of `litestar-start`, a CLI tool for scaffolding Litestar projects.
 

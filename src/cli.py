@@ -1,6 +1,5 @@
 """Command-line interface for litestar-start."""
 
-import sys
 from pathlib import Path
 
 import questionary
@@ -28,6 +27,9 @@ def ask_project_name() -> str:
     Returns:
         The validated project name.
 
+    Raises:
+        SystemExit: If the user cancels the operation.
+
     """
     while True:
         name = questionary.text(
@@ -37,7 +39,7 @@ def ask_project_name() -> str:
 
         if name is None:  # User pressed Ctrl+C
             console.print("\n[yellow]Cancelled.[/yellow]")
-            sys.exit(0)
+            raise SystemExit(0)
 
         error = validate_project_name(name)
         if error:
@@ -53,6 +55,9 @@ def ask_framework() -> Framework:
     Returns:
         The selected framework.
 
+    Raises:
+        SystemExit: If the user cancels the operation.
+
     """
     choices = [
         questionary.Choice(title="Litestar", value=Framework.LITESTAR),
@@ -65,7 +70,7 @@ def ask_framework() -> Framework:
 
     if result is None:
         console.print("\n[yellow]Cancelled.[/yellow]")
-        sys.exit(0)
+        raise SystemExit(0)
 
     return result
 
@@ -75,6 +80,9 @@ def ask_database() -> Database:
 
     Returns:
         The selected database.
+
+    Raises:
+        SystemExit: If the user cancels the operation.
 
     """
     choices = [
@@ -91,7 +99,7 @@ def ask_database() -> Database:
 
     if result is None:
         console.print("\n[yellow]Cancelled.[/yellow]")
-        sys.exit(0)
+        raise SystemExit(0)
 
     return result
 
@@ -104,6 +112,9 @@ def ask_plugins(database: Database) -> list[Plugin]:
 
     Returns:
         A list of selected plugins.
+
+    Raises:
+        SystemExit: If the user cancels the operation.
 
     """
     choices = []
@@ -127,7 +138,7 @@ def ask_plugins(database: Database) -> list[Plugin]:
 
     if result is None:
         console.print("\n[yellow]Cancelled.[/yellow]")
-        sys.exit(0)
+        raise SystemExit(0)
 
     # Filter out None values
     return [p for p in result if p is not None]
@@ -139,6 +150,9 @@ def ask_docker() -> tuple[bool, bool]:
     Returns:
         A tuple of (generate_dockerfile, generate_docker_infra).
 
+    Raises:
+        SystemExit: If the user cancels the operation (e.g., presses Ctrl+C).
+
     """
     docker = questionary.confirm(
         "Generate Dockerfile for the application?",
@@ -147,7 +161,7 @@ def ask_docker() -> tuple[bool, bool]:
 
     if docker is None:
         console.print("\n[yellow]Cancelled.[/yellow]")
-        sys.exit(0)
+        raise SystemExit(0)
 
     docker_infra = questionary.confirm(
         "Generate docker-compose.infra.yml for local development (database, etc.)?",
@@ -156,13 +170,18 @@ def ask_docker() -> tuple[bool, bool]:
 
     if docker_infra is None:
         console.print("\n[yellow]Cancelled.[/yellow]")
-        sys.exit(0)
+        raise SystemExit(0)
 
     return docker, docker_infra
 
 
 def main() -> None:
-    """Run the main CLI interface."""
+    """Run the main CLI interface.
+
+    Raises:
+        SystemExit: If the user cancels the operation (e.g., presses Ctrl+C).
+
+    """
     print_banner()
 
     try:
@@ -202,7 +221,7 @@ def main() -> None:
         proceed = questionary.confirm("Generate project?", default=True).ask()
         if not proceed:
             console.print("[yellow]Cancelled.[/yellow]")
-            sys.exit(0)
+            raise SystemExit(0)
 
         # Generate project
         output_dir = Path.cwd() / config.slug
@@ -224,7 +243,7 @@ def main() -> None:
 
     except KeyboardInterrupt:
         console.print("\n[yellow]Cancelled.[/yellow]")
-        sys.exit(0)
+        return
 
 
 if __name__ == "__main__":

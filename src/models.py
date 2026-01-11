@@ -1,5 +1,7 @@
 """Data models for project configuration."""
 
+from __future__ import annotations
+
 from enum import StrEnum
 
 import msgspec
@@ -67,7 +69,7 @@ class DatabaseConfig(msgspec.Struct):
     docker_image: str | None = None
 
     @classmethod
-    def for_database(cls, db: Database) -> "DatabaseConfig | None":
+    def for_database(cls, db: Database) -> DatabaseConfig | None:
         """Get configuration for a specific database.
 
         Args:
