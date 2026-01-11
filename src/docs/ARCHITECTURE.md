@@ -9,7 +9,7 @@ This document explains the architecture and design of `litestar-start`, a CLI to
 ## Project Structure
 
 ```
-litestar_start/
+src/
 ├── __init__.py          # Package metadata and version
 ├── cli.py               # Main CLI entry point with questionary prompts
 ├── generator.py         # Project generator orchestrator
@@ -134,7 +134,7 @@ All templates use **Jinja2** with `.jinja` extension. Template context includes:
 
 1. Create framework directory:
    ```
-   litestar_start/NewFramework/
+   src/NewFramework/
    ├── __init__.py
    ├── generator.py
    ├── Config/

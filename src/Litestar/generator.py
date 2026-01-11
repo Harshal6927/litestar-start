@@ -3,9 +3,8 @@
 from pathlib import Path
 
 from jinja2 import Environment
-
-from litestar_start.models import DatabaseConfig, ProjectConfig
-from litestar_start.utils import get_package_dir, get_template_env, write_file
+from src.models import DatabaseConfig, ProjectConfig
+from src.utils import get_package_dir, get_template_env, write_file
 
 
 class LitestarGenerator:

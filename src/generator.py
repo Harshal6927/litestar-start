@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from litestar_start.models import Framework, ProjectConfig
+from src.models import Framework, ProjectConfig
 
 
 class ProjectGenerator:
@@ -26,7 +26,7 @@ class ProjectGenerator:
 
         # Delegate to framework-specific generator
         if self.config.framework == Framework.LITESTAR:
-            from litestar_start.Litestar.generator import LitestarGenerator
+            from src.Litestar.generator import LitestarGenerator
 
             generator = LitestarGenerator(self.config, self.output_dir)
             generator.generate()

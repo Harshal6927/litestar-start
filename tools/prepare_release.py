@@ -124,7 +124,7 @@ def main() -> None:
     console.print(f"[green]✓[/green] Updated {pyproject_path.name}")
 
     # Update __init__.py
-    init_path = root_dir / "litestar_start" / "__init__.py"
+    init_path = root_dir / "src" / "__init__.py"
     update_file(
         init_path,
         r'__version__ = "\d+\.\d+\.\d+(?:[ab]\d+)?"',

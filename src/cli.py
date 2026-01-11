@@ -8,20 +8,17 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
-from litestar_start.generator import ProjectGenerator
-from litestar_start.models import Database, Framework, Plugin, ProjectConfig
-from litestar_start.utils import validate_project_name
+from src.generator import ProjectGenerator
+from src.models import Database, Framework, Plugin, ProjectConfig
+from src.utils import validate_project_name
 
 console = Console()
 
 
 def print_banner() -> None:
     """Print the welcome banner."""
-    banner = Text()
-    banner.append("⚡ ", style="yellow")
-    banner.append("Litestar Start", style="bold cyan")
-    banner.append(" ⚡", style="yellow")
-    console.print(Panel(banner, subtitle="Project Scaffolding Tool", expand=False))
+    banner = Text("⚡ Litestar Start ⚡", style="bold cyan", justify="center")
+    console.print(Panel(banner))
     console.print()
 
 
