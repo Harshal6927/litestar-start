@@ -10,12 +10,25 @@ MAX_PROJECT_NAME_LENGTH = 50
 
 
 def get_package_dir() -> Path:
-    """Get the package directory."""
+    """Get the package directory.
+
+    Returns:
+        The path to the package directory.
+
+    """
     return Path(__file__).parent
 
 
 def get_template_env(template_dir: Path) -> Environment:
-    """Create a Jinja2 environment for the given template directory."""
+    """Create a Jinja2 environment for the given template directory.
+
+    Args:
+        template_dir: The directory containing the templates.
+
+    Returns:
+        A configured Jinja2 environment.
+
+    """
     return Environment(
         loader=FileSystemLoader(str(template_dir)),
         autoescape=select_autoescape(default=False),
@@ -26,7 +39,15 @@ def get_template_env(template_dir: Path) -> Environment:
 
 
 def slugify(text: str) -> str:
-    """Convert text to a valid Python package name."""
+    """Convert text to a valid Python package name.
+
+    Args:
+        text: The text to slugify.
+
+    Returns:
+        The slugified text.
+
+    """
     # Convert to lowercase
     text = text.lower()
     # Replace spaces and hyphens with underscores
@@ -40,7 +61,15 @@ def slugify(text: str) -> str:
 
 
 def validate_project_name(name: str) -> str | None:
-    """Validate project name. Returns error message or None if valid."""
+    """Validate project name. Returns error message or None if valid.
+
+    Args:
+        name: The project name to validate.
+
+    Returns:
+        An error message if the name is invalid, otherwise None.
+
+    """
     if not name:
         return "Project name cannot be empty"
     if len(name) < MIN_PROJECT_NAME_LENGTH:
@@ -66,6 +95,16 @@ def write_file(path: Path, content: str) -> None:
 
 
 def render_template(env: Environment, template_name: str, context: dict) -> str:
-    """Render a Jinja2 template with the given context."""
+    """Render a Jinja2 template with the given context.
+
+    Args:
+        env: The Jinja2 environment.
+        template_name: The name of the template to render.
+        context: The context dictionary to render the template with.
+
+    Returns:
+        The rendered template string.
+
+    """
     template = env.get_template(template_name)
     return template.render(**context)

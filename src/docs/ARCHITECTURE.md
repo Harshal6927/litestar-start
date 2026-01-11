@@ -120,7 +120,7 @@ All templates use **Jinja2** with `.jinja` extension. Template context includes:
 
 2. Add to `Plugin` enum in `models.py`:
    ```python
-   class Plugin(str, Enum):
+   class Plugin(StrEnum):
        SQLALCHEMY = "SQLAlchemy"
        JWT = "JWT"
        NEW_PLUGIN = "NewPlugin"  # Add this

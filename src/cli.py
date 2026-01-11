@@ -23,7 +23,12 @@ def print_banner() -> None:
 
 
 def ask_project_name() -> str:
-    """Ask for the project name."""
+    """Ask for the project name.
+
+    Returns:
+        The validated project name.
+
+    """
     while True:
         name = questionary.text(
             "What is your project name?",
@@ -43,7 +48,12 @@ def ask_project_name() -> str:
 
 
 def ask_framework() -> Framework:
-    """Ask for the backend framework."""
+    """Ask for the backend framework.
+
+    Returns:
+        The selected framework.
+
+    """
     choices = [
         questionary.Choice(title="Litestar", value=Framework.LITESTAR),
     ]
@@ -61,7 +71,12 @@ def ask_framework() -> Framework:
 
 
 def ask_database() -> Database:
-    """Ask for the database choice."""
+    """Ask for the database choice.
+
+    Returns:
+        The selected database.
+
+    """
     choices = [
         questionary.Choice(title="PostgreSQL", value=Database.POSTGRESQL),
         questionary.Choice(title="SQLite", value=Database.SQLITE),
@@ -82,7 +97,15 @@ def ask_database() -> Database:
 
 
 def ask_plugins(database: Database) -> list[Plugin]:
-    """Ask for plugins to install."""
+    """Ask for plugins to install.
+
+    Args:
+        database: The selected database to determine plugin availability.
+
+    Returns:
+        A list of selected plugins.
+
+    """
     choices = []
 
     # SQLAlchemy only makes sense with a database
@@ -111,7 +134,12 @@ def ask_plugins(database: Database) -> list[Plugin]:
 
 
 def ask_docker() -> tuple[bool, bool]:
-    """Ask for Docker configuration."""
+    """Ask for Docker configuration.
+
+    Returns:
+        A tuple of (generate_dockerfile, generate_docker_infra).
+
+    """
     docker = questionary.confirm(
         "Generate Dockerfile for the application?",
         default=False,

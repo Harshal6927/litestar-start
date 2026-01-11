@@ -1,17 +1,17 @@
 """Data models for project configuration."""
 
-from enum import Enum
+from enum import StrEnum
 
 import msgspec
 
 
-class Framework(str, Enum):
+class Framework(StrEnum):
     """Supported backend frameworks."""
 
     LITESTAR = "Litestar"
 
 
-class Database(str, Enum):
+class Database(StrEnum):
     """Supported database options."""
 
     POSTGRESQL = "PostgreSQL"
@@ -20,7 +20,7 @@ class Database(str, Enum):
     NONE = "None"
 
 
-class Plugin(str, Enum):
+class Plugin(StrEnum):
     """Available plugins."""
 
     SQLALCHEMY = "SQLAlchemy"
@@ -68,7 +68,15 @@ class DatabaseConfig(msgspec.Struct):
 
     @classmethod
     def for_database(cls, db: Database) -> "DatabaseConfig | None":
-        """Get configuration for a specific database."""
+        """Get configuration for a specific database.
+
+        Args:
+            db: The database type.
+
+        Returns:
+            The configuration for the specified database, or None if not found.
+
+        """
         configs = {
             Database.POSTGRESQL: cls(
                 driver="postgresql+asyncpg",

@@ -3,6 +3,7 @@
 from pathlib import Path
 
 from jinja2 import Environment
+
 from src.models import DatabaseConfig, ProjectConfig
 from src.utils import get_package_dir, get_template_env, write_file
 
@@ -23,7 +24,12 @@ class LitestarGenerator:
         self.litestar_dir = get_package_dir() / "Litestar"
 
     def _get_template_context(self) -> dict:
-        """Build the template context."""
+        """Build the template context.
+
+        Returns:
+            The template context dictionary.
+
+        """
         db_config = DatabaseConfig.for_database(self.config.database)
 
         return {
