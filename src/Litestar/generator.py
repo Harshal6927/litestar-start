@@ -106,10 +106,10 @@ class LitestarGenerator:
 
     def _generate_base(self, context: dict) -> None:
         """Generate base application files."""
-        base_dir = self.litestar_dir / "Base"
-        env = get_template_env(base_dir)
+        app_dir = self.litestar_dir / "App"
+        env = get_template_env(app_dir)
 
-        self._render_templates(base_dir, self.output_dir, env, context)
+        self._render_templates(app_dir, self.output_dir, env, context)
 
     def _generate_plugins(self, context: dict) -> None:
         """Generate plugin-specific files."""

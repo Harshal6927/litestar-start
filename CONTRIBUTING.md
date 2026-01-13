@@ -15,42 +15,39 @@ src/
 ├── generator.py         # Project generator orchestrator
 ├── models.py            # Data models using msgspec
 ├── utils.py             # Utility functions (templating, validation)
-├── Litestar/            # Litestar framework templates
-│   ├── __init__.py
-│   ├── generator.py     # Litestar-specific generation logic
-│   ├── Config/          # Project configuration templates
-│   │   ├── pyproject.toml.jinja
-│   │   ├── gitignore.jinja
-│   │   ├── env.example.jinja
-│   │   └── readme.md.jinja
-│   ├── Containers/      # Docker templates
-│   │   ├── Dockerfile.jinja
-│   │   ├── docker-compose.yml.jinja
-│   │   └── docker-compose.infra.yml.jinja
-│   ├── Base/            # Core application templates
-│   │   └── app/
-│   │       ├── __init__.py.jinja
-│   │       ├── __main__.py.jinja
-│   │       ├── config.py.jinja
-│   │       └── main.py.jinja
-│   └── Plugins/         # Optional plugin templates
-│       ├── __init__.py
-│       ├── SQLAlchemy/
-│       │   ├── __init__.py
-│       │   └── Templates/
-│       │       └── db/
-│       │           ├── __init__.py.jinja
-│       │           ├── config.py.jinja
-│       │           └── models.py.jinja
-│       └── JWT/
-│           ├── __init__.py
-│           └── Templates/
-│               └── auth/
-│                   ├── __init__.py.jinja
-│                   ├── guards.py.jinja
-│                   └── schemas.py.jinja
-└── docs/
-    └── ARCHITECTURE.md  # This file
+└── Litestar/            # Litestar framework templates
+    ├── __init__.py
+    ├── generator.py     # Litestar-specific generation logic
+    ├── Config/          # Project configuration templates
+    │   ├── pyproject.toml.jinja
+    │   ├── gitignore.jinja
+    │   ├── env.example.jinja
+    │   └── readme.md.jinja
+    ├── Containers/      # Docker templates
+    │   ├── Dockerfile.jinja
+    │   ├── docker-compose.yml.jinja
+    │   └── docker-compose.infra.yml.jinja
+    ├── app/             # Core application templates
+    │   ├── __init__.py.jinja
+    │   ├── __main__.py.jinja
+    │   ├── config.py.jinja
+    │   └── main.py.jinja
+    └── Plugins/         # Optional plugin templates
+        ├── __init__.py
+        ├── SQLAlchemy/
+        │   ├── __init__.py
+        │   └── Templates/
+        │       └── db/
+        │           ├── __init__.py.jinja
+        │           ├── config.py.jinja
+        │           └── models.py.jinja
+        └── JWT/
+            ├── __init__.py
+            └── Templates/
+                └── auth/
+                    ├── __init__.py.jinja
+                    ├── guards.py.jinja
+                    └── schemas.py.jinja
 ```
 
 ## Core Components
@@ -137,9 +134,9 @@ All templates use **Jinja2** with `.jinja` extension. Template context includes:
    src/NewFramework/
    ├── __init__.py
    ├── generator.py
+   ├── App/
    ├── Config/
    ├── Containers/
-   ├── Base/
    └── Plugins/
    ```
 

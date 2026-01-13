@@ -128,9 +128,6 @@ def ask_plugins(database: Database) -> list[Plugin]:
     if not choices:
         return []
 
-    # Add "None" option
-    choices.append(questionary.Choice(title="None (skip plugins)", value=None))
-
     result = questionary.checkbox(
         "Select plugins (space to select, enter to confirm):",
         choices=choices,
@@ -140,8 +137,7 @@ def ask_plugins(database: Database) -> list[Plugin]:
         console.print("\n[yellow]Cancelled.[/yellow]")
         raise SystemExit(0)
 
-    # Filter out None values
-    return [p for p in result if p is not None]
+    return result
 
 
 def ask_docker() -> tuple[bool, bool]:
