@@ -5,11 +5,8 @@ A Litestar application generated with [litestar-start](https://github.com/Harsha
 ## Features
 
 - ⚡ **Litestar** - High-performance ASGI framework
-{% if has_sqlalchemy %}
-- 🗄️ **SQLAlchemy** - Async ORM with {{ database.value }}
-{% endif %}
-{% if has_jwt %}
-- 🔐 **JWT Authentication** - Secure token-based auth
+{% if has_advanced_alchemy %}
+- 🗄️ **AdvancedAlchemy** - Async ORM with {{ database.value }}
 {% endif %}
 {% if docker %}
 - 🐳 **Docker** - Containerized deployment
@@ -73,17 +70,10 @@ The API will be available at http://localhost:8000
 │   ├── __main__.py
 │   ├── config.py
 │   └── main.py
-{% if has_sqlalchemy %}
-├── db/
+{% if has_advanced_alchemy %}
+├── models/
 │   ├── __init__.py
-│   ├── config.py
-│   └── models.py
-{% endif %}
-{% if has_jwt %}
-├── auth/
-│   ├── __init__.py
-│   ├── guards.py
-│   └── schemas.py
+│   └── config.py
 {% endif %}
 ├── .env.example
 ├── .gitignore

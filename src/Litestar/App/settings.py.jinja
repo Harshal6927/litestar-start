@@ -2,24 +2,10 @@
 
 import os
 from dataclasses import dataclass, field
+from functools import lru_cache
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-
-def _get_bool(key: str, default: bool = False) -> bool:
-    """Get a boolean from environment."""
-    value = os.getenv(key, str(default)).lower()
-    return value in ("true", "1", "yes", "on")
-
-
-def _get_int(key: str, default: int) -> int:
-    """Get an integer from environment."""
-    return int(os.getenv(key, str(default)))
-
+TRUTHY = ("true", "1", "yes")
 
 @dataclass
 class Settings:
@@ -28,11 +14,11 @@ class Settings:
     # Application
     APP_NAME: str = field(default_factory=lambda: os.getenv("APP_NAME", "{{ project_name }}"))
     APP_ENV: str = field(default_factory=lambda: os.getenv("APP_ENV", "development"))
-    DEBUG: bool = field(default_factory=lambda: _get_bool("DEBUG", True))
+    DEBUG: bool = field(default_factory=lambda: os.getenv("DEBUG", "true").lower() in TRUTHY)
 
     # Server
     HOST: str = field(default_factory=lambda: os.getenv("HOST", "0.0.0.0"))
-    PORT: int = field(default_factory=lambda: _get_int("PORT", 8000))
+    PORT: int = field(default_factory=lambda: int(os.getenv("PORT", "8000")))
 
 {% if has_database %}
     # Database
@@ -60,19 +46,24 @@ class Settings:
 {% endif %}
 {% endif %}
 
-{% if has_jwt %}
-    # JWT
-    JWT_SECRET: str = field(
-        default_factory=lambda: os.getenv("JWT_SECRET", "your-super-secret-key-change-in-production")
-    )
-    JWT_ALGORITHM: str = field(default_factory=lambda: os.getenv("JWT_ALGORITHM", "HS256"))
-    JWT_EXPIRATION_MINUTES: int = field(default_factory=lambda: _get_int("JWT_EXPIRATION_MINUTES", 60))
-{% endif %}
+    @classmethod
+    def from_env(cls, dotenv_filename: str) -> "Settings":
+        env_file = (
+            Path(dotenv_filename) if Path(dotenv_filename).is_absolute() else Path(f"{os.curdir}/{dotenv_filename}")
+        )
 
-    @property
-    def is_production(self) -> bool:
-        """Check if running in production."""
-        return self.APP_ENV == "production"
+        if env_file.is_file():
+            from dotenv import load_dotenv
+
+            console.print(
+                f"[yellow]Loading environment configuration from {dotenv_filename}[/]",
+                markup=True,
+            )
+
+            load_dotenv(env_file, override=True)
+        return Settings()
 
 
-settings = Settings()
+@lru_cache(maxsize=1, typed=True)
+def get_settings() -> Settings:
+    return Settings.from_env(dotenv_filename=".env")

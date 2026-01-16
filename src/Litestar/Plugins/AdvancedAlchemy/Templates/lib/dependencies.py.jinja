@@ -1,0 +1,28 @@
+"""Dependency injection providers for services."""
+
+from collections.abc import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.lib.services import UserService
+
+
+async def provide_user_service(
+    db_session: AsyncSession | None = None,
+) -> AsyncGenerator[UserService, None]:
+    """Provide a User service instance.
+
+    Args:
+        db_session: Optional database session.
+
+    Yields:
+        UserService: The user service instance.
+
+    """
+    async with UserService.new(
+        session=db_session,
+        error_messages={
+            "not_found": "No user found with the given ID.",
+        },
+    ) as service:
+        yield service

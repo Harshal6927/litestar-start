@@ -1,0 +1,9 @@
+"""Application library utilities."""
+
+{% if has_advanced_alchemy %}
+from app.lib.utils import exception_handler
+
+__all__ = ["exception_handler"]
+{% else %}
+__all__ = []
+{% endif %}

@@ -1,1 +1,0 @@
-"""SQLAlchemy plugin for Litestar."""

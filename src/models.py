@@ -25,8 +25,9 @@ class Database(StrEnum):
 class Plugin(StrEnum):
     """Available plugins."""
 
-    SQLALCHEMY = "SQLAlchemy"
-    JWT = "JWT"
+    ADVANCED_ALCHEMY = "AdvancedAlchemy"
+    LITESTAR_SAQ = "LitestarSAQ"
+    LITESTAR_VITE = "LitestarVite"
 
 
 class ProjectConfig(msgspec.Struct):
@@ -45,14 +46,9 @@ class ProjectConfig(msgspec.Struct):
         return self.name.lower().replace("-", "_").replace(" ", "_")
 
     @property
-    def has_sqlalchemy(self) -> bool:
-        """Check if SQLAlchemy plugin is enabled."""
-        return Plugin.SQLALCHEMY in self.plugins
-
-    @property
-    def has_jwt(self) -> bool:
-        """Check if JWT plugin is enabled."""
-        return Plugin.JWT in self.plugins
+    def has_advanced_alchemy(self) -> bool:
+        """Check if AdvancedAlchemy plugin is enabled."""
+        return Plugin.ADVANCED_ALCHEMY in self.plugins
 
     @property
     def needs_docker_infra(self) -> bool:

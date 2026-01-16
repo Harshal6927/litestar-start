@@ -7,9 +7,8 @@ requires-python = ">=3.10"
 dependencies = [
     "litestar[standard]>=2.16.0",
     "python-dotenv>=1.1.0",
-{% if has_sqlalchemy %}
-    "sqlalchemy>=2.0.0",
-    "advanced-alchemy>=0.31.0",
+{% if has_advanced_alchemy %}
+    "advanced-alchemy>=1.8.2",
 {% if database.value == "PostgreSQL" %}
     "psycopg[binary,pool]>=3.3.2",
 {% elif database.value == "SQLite" %}
@@ -17,10 +16,6 @@ dependencies = [
 {% elif database.value == "MySQL" %}
     "asyncmy>=0.2.10",
 {% endif %}
-{% endif %}
-{% if has_jwt %}
-    "pyjwt>=2.10.0",
-    "passlib[bcrypt]>=1.7.4",
 {% endif %}
 ]
 

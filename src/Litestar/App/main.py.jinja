@@ -4,11 +4,10 @@ from litestar import Litestar, get
 from litestar.openapi import OpenAPIConfig
 
 from app.config import settings
-{% if has_sqlalchemy %}
-from db.config import db_plugin
-{% endif %}
-{% if has_jwt %}
-from auth.guards import jwt_auth
+{% if has_advanced_alchemy %}
+from advanced_alchemy.exceptions import RepositoryError
+from app.config import alchemy
+from app.lib import exception_handler
 {% endif %}
 
 
@@ -32,10 +31,11 @@ app = Litestar(
         path="/api",
     ),
     debug=settings.DEBUG,
-{% if has_sqlalchemy %}
-    plugins=[db_plugin],
-{% endif %}
-{% if has_jwt %}
-    on_app_init=[jwt_auth.on_app_init],
+{% if has_advanced_alchemy %}
+    exception_handlers={
+        Exception: exception_handler,
+        RepositoryError: exception_handler,
+    },
+    plugins=[alchemy],
 {% endif %}
 )

@@ -41,11 +41,8 @@ ENV PATH="/workspace/app/.venv/bin:$PATH" \
 
 COPY --from=builder /workspace/app/.venv ./.venv
 COPY --from=builder /workspace/app/app ./app
-{% if has_sqlalchemy %}
-COPY --from=builder /workspace/app/db ./db
-{% endif %}
-{% if has_jwt %}
-COPY --from=builder /workspace/app/auth ./auth
+{% if has_advanced_alchemy %}
+COPY --from=builder /workspace/app/models ./models
 {% endif %}
 
 # Create non-root user

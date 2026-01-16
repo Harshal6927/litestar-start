@@ -4,7 +4,7 @@ This document explains the architecture and design of `litestar-start`, a CLI to
 
 ## Overview
 
-`litestar-start` is an interactive CLI tool that helps developers quickly scaffold new Litestar projects with optional plugins like SQLAlchemy and JWT authentication.
+`litestar-start` is an interactive CLI tool that helps developers quickly scaffold new Litestar projects with optional plugins like AdvancedAlchemy ORM.
 
 ## Project Structure
 
@@ -98,8 +98,7 @@ All templates use **Jinja2** with `.jinja` extension. Template context includes:
 - `project_name` - Human-readable name
 - `project_slug` - Python-safe name
 - `database` - Selected database enum
-- `has_sqlalchemy` - Boolean flag
-- `has_jwt` - Boolean flag
+- `has_advanced_alchemy` - Boolean flag
 - `docker` - Boolean flag
 
 ## Adding New Features
@@ -118,8 +117,9 @@ All templates use **Jinja2** with `.jinja` extension. Template context includes:
 2. Add to `Plugin` enum in `models.py`:
    ```python
    class Plugin(StrEnum):
-       SQLALCHEMY = "SQLAlchemy"
-       JWT = "JWT"
+       ADVANCED_ALCHEMY = "AdvancedAlchemy"
+       LITESTAR_SAQ = "LitestarSAQ"
+       LITESTAR_VITE = "LitestarVite"
        NEW_PLUGIN = "NewPlugin"  # Add this
    ```
 
@@ -180,8 +180,7 @@ Templates are rendered using Jinja2 with these settings:
 | `project_slug` | `str` | Python-safe name |
 | `database` | `Database` | Selected database enum |
 | `db_config` | `DatabaseConfig` | Database configuration |
-| `has_sqlalchemy` | `bool` | SQLAlchemy plugin enabled |
-| `has_jwt` | `bool` | JWT plugin enabled |
+| `has_advanced_alchemy` | `bool` | AdvancedAlchemy plugin enabled |
 | `has_database` | `bool` | Any database selected |
 | `docker` | `bool` | Dockerfile requested |
 | `docker_infra` | `bool` | Infra compose requested |
@@ -197,7 +196,7 @@ my_project/
 │   ├── __main__.py
 │   ├── config.py
 │   └── main.py
-├── db/                    # If SQLAlchemy selected
+├── models/                # If AdvancedAlchemy selected
 │   ├── __init__.py
 │   ├── config.py
 │   └── models.py

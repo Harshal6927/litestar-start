@@ -1,0 +1,17 @@
+"""AdvancedAlchemy services for database operations."""
+
+from advanced_alchemy.repository import SQLAlchemyAsyncRepository
+from advanced_alchemy.service import SQLAlchemyAsyncRepositoryService
+
+from models import User
+
+
+class UserService(SQLAlchemyAsyncRepositoryService[User]):
+    """User database service."""
+
+    class UserRepository(SQLAlchemyAsyncRepository[User]):
+        """User repository."""
+
+        model_type = User
+
+    repository_type = UserRepository

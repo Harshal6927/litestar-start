@@ -119,11 +119,13 @@ def ask_plugins(database: Database) -> list[Plugin]:
     """
     choices = []
 
-    # SQLAlchemy only makes sense with a database
+    # AdvancedAlchemy only makes sense with a database
     if database != Database.NONE:
-        choices.append(questionary.Choice(title="SQLAlchemy (ORM)", value=Plugin.SQLALCHEMY))
+        choices.append(questionary.Choice(title="AdvancedAlchemy (ORM)", value=Plugin.ADVANCED_ALCHEMY))
 
-    choices.append(questionary.Choice(title="JWT (Authentication)", value=Plugin.JWT))
+    # Add other plugins
+    choices.append(questionary.Choice(title="Litestar SAQ (Background Tasks)", value=Plugin.LITESTAR_SAQ))
+    choices.append(questionary.Choice(title="Litestar Vite (Frontend Integration)", value=Plugin.LITESTAR_VITE))
 
     if not choices:
         return []
