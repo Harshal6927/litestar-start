@@ -2,13 +2,13 @@
 
 import uvicorn
 
-from app.config import settings
+from config import settings
 
 
 def main() -> None:
     """Run the application."""
     uvicorn.run(
-        "app.main:app",
+        "app:app",
         host=settings.HOST,
         port=settings.PORT,
         reload=settings.DEBUG,

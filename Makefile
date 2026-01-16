@@ -2,9 +2,10 @@
 
 lint:
 	@echo "Running linters... 🔄"
+	ruff check --fix
+	ty check
 	pre-commit install
 	pre-commit run -a
-	ty check
 	@echo "Linters completed. ✅"
 
 release:

@@ -1,19 +1,21 @@
-from app.settings import get_settings
-
-settings = get_settings()
-
 {% if has_advanced_alchemy %}
 from advanced_alchemy.extensions.litestar import (
     AsyncSessionConfig,
     SQLAlchemyAsyncConfig,
     SQLAlchemyPlugin,
 )
+{% endif %}
 
-session_config = AsyncSessionConfig(expire_on_commit=False)
+from settings import get_settings
+
+settings = get_settings()
+
+
+{% if has_advanced_alchemy %}
 alchemy_config = SQLAlchemyAsyncConfig(
     connection_string=settings.DATABASE_URL,
     before_send_handler="autocommit",
-    session_config=session_config,
+    session_config=AsyncSessionConfig(expire_on_commit=False),
     create_all=True,
 )
 alchemy = SQLAlchemyPlugin(config=alchemy_config)

@@ -1,0 +1,9 @@
+.PHONY: lint
+
+lint:
+	@echo "Running linters... 🔄"
+	ruff check --fix
+	ty check
+	pre-commit install
+	pre-commit run -a
+	@echo "Linters completed. ✅"

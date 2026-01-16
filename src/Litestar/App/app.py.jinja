@@ -1,13 +1,14 @@
 """Litestar application factory."""
 
 from litestar import Litestar, get
+from litestar.logging import LoggingConfig
 from litestar.openapi import OpenAPIConfig
 from litestar.openapi.plugins import ScalarRenderPlugin
-from app.config import settings
+from config import settings
 {% if has_advanced_alchemy %}
 from advanced_alchemy.exceptions import RepositoryError
-from app.config import alchemy
-from app.lib import exception_handler
+from config import alchemy
+from lib import exception_handler
 {% endif %}
 
 
@@ -25,13 +26,19 @@ async def health() -> dict[str, str]:
 
 app = Litestar(
     route_handlers=[index, health],
+    debug=settings.DEBUG,
     openapi_config=OpenAPIConfig(
         title=settings.APP_NAME,
         version="0.1.0",
         path="/api",
         render_plugins=[ScalarRenderPlugin()],
     ),
-    debug=settings.DEBUG,
+    logging_config=LoggingConfig(
+        disable_stack_trace={
+            404,
+        },
+        log_exceptions="always",
+    ),
 {% if has_advanced_alchemy %}
     exception_handlers={
         Exception: exception_handler,

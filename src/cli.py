@@ -1,5 +1,6 @@
 """Command-line interface for litestar-start."""
 
+import subprocess  # noqa: S404
 from pathlib import Path
 
 import questionary
@@ -124,8 +125,12 @@ def ask_plugins(database: Database) -> list[Plugin]:
         choices.append(questionary.Choice(title="AdvancedAlchemy (ORM)", value=Plugin.ADVANCED_ALCHEMY))
 
     # Add other plugins
-    choices.append(questionary.Choice(title="Litestar SAQ (Background Tasks)", value=Plugin.LITESTAR_SAQ))
-    choices.append(questionary.Choice(title="Litestar Vite (Frontend Integration)", value=Plugin.LITESTAR_VITE))
+    choices.extend(
+        [
+            questionary.Choice(title="Litestar SAQ (Background Tasks)", value=Plugin.LITESTAR_SAQ),
+            questionary.Choice(title="Litestar Vite (Frontend Integration)", value=Plugin.LITESTAR_VITE),
+        ],
+    )
 
     if not choices:
         return []
@@ -171,6 +176,53 @@ def ask_docker() -> tuple[bool, bool]:
         raise SystemExit(0)
 
     return docker, docker_infra
+
+
+def run_post_generation_setup(config: ProjectConfig, output_dir: Path) -> None:
+    """Run post-generation setup commands.
+
+    Args:
+        config: The project configuration.
+        output_dir: The output directory for the project.
+
+    """
+    # Initialize git repository
+    with console.status("[bold green]Initializing git repository..."):
+        subprocess.run(["git", "init"], cwd=output_dir, check=True, capture_output=True)  # noqa: S607
+    console.print("[bold green]✓[/bold green] Git repository initialized")
+
+    # Install dependencies with uv
+    with console.status("[bold green]Installing dependencies with uv sync..."):
+        subprocess.run(["uv", "sync"], cwd=output_dir, check=True, capture_output=True)  # noqa: S607
+        subprocess.run(["source", ".venv/bin/activate"], cwd=output_dir, check=True, capture_output=True)  # noqa: S607
+    console.print("[bold green]✓[/bold green] Dependencies installed")
+
+    # Start docker infrastructure if needed
+    if config.needs_docker_infra:
+        with console.status("[bold green]Starting Docker infrastructure..."):
+            subprocess.run(
+                ["docker", "compose", "-f", "docker-compose.infra.yml", "up", "-d"],  # noqa: S607
+                cwd=output_dir,
+                check=True,
+                capture_output=True,
+            )
+        console.print("[bold green]✓[/bold green] Docker infrastructure started")
+
+    # Ask if user wants to start the application
+    console.print()
+    start_app = questionary.confirm(
+        "Start the application now?",
+        default=True,
+    ).ask()
+
+    if start_app:
+        subprocess.run(["litestar", "run", "--reload"], cwd=output_dir, check=True)  # noqa: S607
+    else:
+        console.print()
+        console.print("[bold]To start your application:[/bold]")
+        console.print(f"  cd {config.slug}")
+        console.print("  uv run litestar run --reload")
+        console.print()
 
 
 def main() -> None:
@@ -231,13 +283,9 @@ def main() -> None:
         console.print()
         console.print(f"[bold green]✓[/bold green] Project created at [cyan]{output_dir}[/cyan]")
         console.print()
-        console.print("[bold]Next steps:[/bold]")
-        console.print(f"  cd {config.slug}")
-        console.print("  uv sync")
-        if config.needs_docker_infra:
-            console.print("  docker compose -f docker-compose.infra.yml up -d")
-        console.print("  litestar run --reload")
-        console.print()
+
+        # Run post-generation setup
+        run_post_generation_setup(config, output_dir)
 
     except KeyboardInterrupt:
         console.print("\n[yellow]Cancelled.[/yellow]")
