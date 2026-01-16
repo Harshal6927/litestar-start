@@ -16,7 +16,7 @@ license = "MIT"
 name = "litestar-start"
 readme = "README.md"
 requires-python = ">=3.13"
-version = "0.1.0a10"
+version = "0.1.0a11"
 
 [project.scripts]
 litestar-start = "src.cli:main"
