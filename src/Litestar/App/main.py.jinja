@@ -2,7 +2,7 @@
 
 from litestar import Litestar, get
 from litestar.openapi import OpenAPIConfig
-
+from litestar.openapi.plugins import ScalarRenderPlugin
 from app.config import settings
 {% if has_advanced_alchemy %}
 from advanced_alchemy.exceptions import RepositoryError
@@ -29,6 +29,7 @@ app = Litestar(
         title=settings.APP_NAME,
         version="0.1.0",
         path="/api",
+        render_plugins=[ScalarRenderPlugin()],
     ),
     debug=settings.DEBUG,
 {% if has_advanced_alchemy %}
