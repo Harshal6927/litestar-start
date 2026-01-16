@@ -194,7 +194,6 @@ def run_post_generation_setup(config: ProjectConfig, output_dir: Path) -> None:
     # Install dependencies with uv
     with console.status("[bold green]Installing dependencies with uv sync..."):
         subprocess.run(["uv", "sync"], cwd=output_dir, check=True, capture_output=True)  # noqa: S607
-        subprocess.run(["source", ".venv/bin/activate"], cwd=output_dir, check=True, capture_output=True)  # noqa: S607
     console.print("[bold green]✓[/bold green] Dependencies installed")
 
     # Start docker infrastructure if needed
@@ -216,7 +215,7 @@ def run_post_generation_setup(config: ProjectConfig, output_dir: Path) -> None:
     ).ask()
 
     if start_app:
-        subprocess.run(["litestar", "run", "--reload"], cwd=output_dir, check=True)  # noqa: S607
+        subprocess.run(["uv", "run", "litestar", "run", "--reload"], cwd=output_dir, check=True)  # noqa: S607
     else:
         console.print()
         console.print("[bold]To start your application:[/bold]")
