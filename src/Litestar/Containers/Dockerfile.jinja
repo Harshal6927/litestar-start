@@ -41,7 +41,7 @@ ENV PATH="/workspace/app/.venv/bin:$PATH" \
 
 COPY --from=builder /workspace/app/.venv ./.venv
 COPY --from=builder /workspace/app/app ./app
-{% if has_advanced_alchemy %}
+{% if advanced_alchemy %}
 COPY --from=builder /workspace/app/models ./models
 {% endif %}
 

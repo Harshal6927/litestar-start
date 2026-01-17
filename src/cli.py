@@ -207,6 +207,16 @@ def run_post_generation_setup(config: ProjectConfig, output_dir: Path) -> None:
             )
         console.print("[bold green]✓[/bold green] Docker infrastructure started")
 
+    # Run Litestar Vite setup if needed
+    if Plugin.LITESTAR_VITE in config.plugins:
+        console.print("[bold green]Setting up Litestar Vite...[/bold green]")
+        subprocess.run(
+            ["uv", "run", "litestar", "assets", "init"],  # noqa: S607
+            cwd=output_dir,
+            check=True,
+        )
+        console.print("[bold green]✓[/bold green] Litestar Vite setup complete")
+
     # Ask if user wants to start the application
     console.print()
     start_app = questionary.confirm(
@@ -215,12 +225,12 @@ def run_post_generation_setup(config: ProjectConfig, output_dir: Path) -> None:
     ).ask()
 
     if start_app:
-        subprocess.run(["uv", "run", "litestar", "run", "--reload"], cwd=output_dir, check=True)  # noqa: S607
+        subprocess.run(["uv", "run", "litestar", "run"], cwd=output_dir, check=True)  # noqa: S607
     else:
         console.print()
         console.print("[bold]To start your application:[/bold]")
         console.print(f"  cd {config.slug}")
-        console.print("  uv run litestar run --reload")
+        console.print("  uv run litestar run")
         console.print()
 
 

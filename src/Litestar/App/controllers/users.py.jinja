@@ -1,0 +1,40 @@
+{% if advanced_alchemy %}
+from litestar.controller import Controller
+from litestar.di import Provide
+from lib import provide_user_service, UserService
+from litestar import delete, get, patch, post
+from schemas import CreateUser, ReadUser, UpdateUser
+
+
+class UserController(Controller):
+    path = "/api/users"
+    tags = ["Users"]
+    dependencies = {
+        "user_service": Provide(provide_user_service),
+    }
+
+    @post()
+    async def create_user(self, data: CreateUser, user_service: UserService) -> ReadUser:
+        user = await user_service.create(data)
+        return user_service.to_schema(user, schema_type=ReadUser)
+
+    @get("/{user_id:int}")
+    async def get_user(self, user_id: int, user_service: UserService) -> ReadUser:
+        user = await user_service.get(user_id)
+        return user_service.to_schema(user, schema_type=ReadUser)
+
+    @patch("/{user_id:int}")
+    async def update_user(
+        self,
+        user_id: int,
+        data: UpdateUser,
+        user_service: UserService,
+    ) -> ReadUser:
+        user = await user_service.update(data, item_id=user_id)
+        return user_service.to_schema(user, schema_type=ReadUser)
+
+    @delete("/{user_id:int}", status_code=200)
+    async def delete_user(self, user_id: int, user_service: UserService) -> ReadUser:
+        user = await user_service.delete(user_id)
+        return user_service.to_schema(user, schema_type=ReadUser)
+{% endif %}

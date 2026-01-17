@@ -1,0 +1,19 @@
+{% if advanced_alchemy %}
+from datetime import datetime
+from msgspec import Struct
+
+class CreateUser(Struct):
+    name: str
+    email: str
+
+class ReadUser(Struct):
+    id: int
+    name: str
+    email: str
+    created_at: datetime
+    updated_at: datetime
+
+class UpdateUser(Struct):
+    name: str | None = None
+    email: str | None = None
+{% endif %}

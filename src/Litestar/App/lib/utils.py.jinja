@@ -1,4 +1,4 @@
-{% if has_advanced_alchemy %}
+{% if advanced_alchemy %}
 from typing import Any
 
 from advanced_alchemy.exceptions import IntegrityError, NotFoundError, RepositoryError
@@ -43,5 +43,5 @@ def exception_handler(
             ),
         )
 
-    return create_exception_response(request, http_exc(detail=str(exc.detail)))
+    return create_exception_response(request, http_exc(detail=str(getattr(exc, "detail", "An error occurred"))))
 {% endif %}

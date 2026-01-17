@@ -98,7 +98,7 @@ All templates use **Jinja2** with `.jinja` extension. Template context includes:
 - `project_name` - Human-readable name
 - `project_slug` - Python-safe name
 - `database` - Selected database enum
-- `has_advanced_alchemy` - Boolean flag
+- `advanced_alchemy` - Boolean flag
 - `docker` - Boolean flag
 
 ## Adding New Features
@@ -180,7 +180,7 @@ Templates are rendered using Jinja2 with these settings:
 | `project_slug` | `str` | Python-safe name |
 | `database` | `Database` | Selected database enum |
 | `db_config` | `DatabaseConfig` | Database configuration |
-| `has_advanced_alchemy` | `bool` | AdvancedAlchemy plugin enabled |
+| `advanced_alchemy` | `bool` | AdvancedAlchemy plugin enabled |
 | `has_database` | `bool` | Any database selected |
 | `docker` | `bool` | Dockerfile requested |
 | `docker_infra` | `bool` | Infra compose requested |

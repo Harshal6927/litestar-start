@@ -1,0 +1,11 @@
+"""Application controllers package."""
+
+{% if advanced_alchemy %}
+from controllers.users import UserController
+
+__all__ = [
+    "UserController",
+]
+{% else %}
+__all__ = []
+{% endif %}

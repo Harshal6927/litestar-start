@@ -5,18 +5,15 @@ from litestar.logging import LoggingConfig
 from litestar.openapi import OpenAPIConfig
 from litestar.openapi.plugins import ScalarRenderPlugin
 from config import settings
-{% if has_advanced_alchemy %}
+{% if advanced_alchemy %}
 from advanced_alchemy.exceptions import RepositoryError
 from config import alchemy
 from lib import exception_handler
+from controllers import UserController
 {% endif %}
-
-
-@get("/")
-async def index() -> dict[str, str]:
-    """Root endpoint."""
-    return {"message": "Hello, World!", "app": settings.APP_NAME}
-
+{% if litestar_vite %}
+from litestar_vite import ViteConfig, VitePlugin
+{% endif %}
 
 @get("/health")
 async def health() -> dict[str, str]:
@@ -25,7 +22,11 @@ async def health() -> dict[str, str]:
 
 
 app = Litestar(
-    route_handlers=[index, health],
+{% if advanced_alchemy %}
+    route_handlers=[health, UserController],
+{% else %}
+    route_handlers=[health],
+{% endif %}
     debug=settings.DEBUG,
     openapi_config=OpenAPIConfig(
         title=settings.APP_NAME,
@@ -39,11 +40,17 @@ app = Litestar(
         },
         log_exceptions="always",
     ),
-{% if has_advanced_alchemy %}
+{% if advanced_alchemy %}
     exception_handlers={
-        Exception: exception_handler,
-        RepositoryError: exception_handler,
-    },
+            Exception: exception_handler,
+            RepositoryError: exception_handler,
+        },
+{% endif %}
+{% if advanced_alchemy and litestar_vite %}
+    plugins=[alchemy, VitePlugin(config=ViteConfig(dev_mode=settings.DEBUG))],
+{% elif advanced_alchemy %}
     plugins=[alchemy],
+{% elif litestar_vite %}
+    plugins=[VitePlugin(config=ViteConfig(dev_mode=settings.DEBUG))],
 {% endif %}
 )

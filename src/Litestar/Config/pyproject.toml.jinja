@@ -7,7 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "litestar[standard]>=2.16.0",
     "python-dotenv>=1.1.0",
-{% if has_advanced_alchemy %}
+{% if advanced_alchemy %}
     "advanced-alchemy>=1.8.2",
 {% if database.value == "PostgreSQL" %}
     "psycopg[binary,pool]>=3.3.2",
@@ -16,6 +16,9 @@ dependencies = [
 {% elif database.value == "MySQL" %}
     "asyncmy>=0.2.10",
 {% endif %}
+{% endif %}
+{% if litestar_vite %}
+    "litestar-vite>=0.16.4",
 {% endif %}
 ]
 

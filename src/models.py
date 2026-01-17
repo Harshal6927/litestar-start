@@ -51,6 +51,16 @@ class ProjectConfig(msgspec.Struct):
         return Plugin.ADVANCED_ALCHEMY in self.plugins
 
     @property
+    def has_litestar_vite(self) -> bool:
+        """Check if LitestarVite plugin is enabled."""
+        return Plugin.LITESTAR_VITE in self.plugins
+
+    @property
+    def has_litestar_saq(self) -> bool:
+        """Check if LitestarSAQ plugin is enabled."""
+        return Plugin.LITESTAR_SAQ in self.plugins
+
+    @property
     def needs_docker_infra(self) -> bool:
         """Check if docker-compose.infra.yml should be generated."""
         return self.docker_infra and self.database in {Database.POSTGRESQL, Database.MYSQL}

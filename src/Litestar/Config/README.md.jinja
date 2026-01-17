@@ -5,7 +5,7 @@ A Litestar application generated with [litestar-start](https://github.com/Harsha
 ## Features
 
 - ⚡ **Litestar** - High-performance ASGI framework
-{% if has_advanced_alchemy %}
+{% if advanced_alchemy %}
 - 🗄️ **AdvancedAlchemy** - Async ORM with {{ database.value }}
 {% endif %}
 {% if docker %}
@@ -70,7 +70,7 @@ The API will be available at http://localhost:8000
 │   ├── __main__.py
 │   ├── config.py
 │   └── main.py
-{% if has_advanced_alchemy %}
+{% if advanced_alchemy %}
 ├── models/
 │   ├── __init__.py
 │   └── config.py
