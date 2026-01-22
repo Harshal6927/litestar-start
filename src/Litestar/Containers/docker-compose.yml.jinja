@@ -11,7 +11,7 @@ services:
       - DEBUG=false
 {% if has_database %}
 {% if database.value == "PostgreSQL" %}
-      - DATABASE_URL=postgresql+asyncpg://myuser:mypassword@postgres:5432/mydb
+      - DATABASE_URL=postgresql+psycopg://myuser:mypassword@postgres:5432/mydb
 {% elif database.value == "MySQL" %}
       - DATABASE_URL=mysql+asyncmy://myuser:mypassword@mysql:3306/mydb
 {% elif database.value == "SQLite" %}

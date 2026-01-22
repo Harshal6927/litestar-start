@@ -1,8 +1,9 @@
 {% if advanced_alchemy %}
+from litestar import delete, get, patch, post
 from litestar.controller import Controller
 from litestar.di import Provide
-from lib import provide_user_service, UserService
-from litestar import delete, get, patch, post
+
+from lib import UserService, provide_user_service
 from schemas import CreateUser, ReadUser, UpdateUser
 
 

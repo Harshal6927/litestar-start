@@ -42,9 +42,9 @@ app = Litestar(
     ),
 {% if advanced_alchemy %}
     exception_handlers={
-            Exception: exception_handler,
-            RepositoryError: exception_handler,
-        },
+        Exception: exception_handler,
+        RepositoryError: exception_handler,
+    },
 {% endif %}
 {% if advanced_alchemy and litestar_vite %}
     plugins=[alchemy, VitePlugin(config=ViteConfig(dev_mode=settings.DEBUG))],

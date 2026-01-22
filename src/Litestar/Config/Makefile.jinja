@@ -1,5 +1,4 @@
 .PHONY: lint
-
 lint:
 	@echo "Running linters... 🔄"
 	ruff check --fix
@@ -7,3 +6,19 @@ lint:
 	pre-commit install
 	pre-commit run -a
 	@echo "Linters completed. ✅"
+
+{% if database.value == "PostgreSQL" or database.value == "MySQL" %}
+INFRA_COMPOSE_FILE := docker-compose.infra.yml
+
+.PHONY: start-infra
+start-infra:
+	@echo "Starting infrastructure (AlloyDB Omni)... 🔄"
+	docker compose -f $(INFRA_COMPOSE_FILE) up -d
+	@echo "Infrastructure started. ✅"
+
+.PHONY: stop-infra
+stop-infra:
+	@echo "Stopping infrastructure... 🔄"
+	docker compose -f $(INFRA_COMPOSE_FILE) down
+	@echo "Infrastructure stopped. ✅"
+{% endif %}

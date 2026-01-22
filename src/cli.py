@@ -1,5 +1,6 @@
 """Command-line interface for litestar-start."""
 
+import shutil
 import subprocess  # noqa: S404
 from pathlib import Path
 
@@ -216,6 +217,13 @@ def run_post_generation_setup(config: ProjectConfig, output_dir: Path) -> None:
             check=True,
         )
         console.print("[bold green]✓[/bold green] Litestar Vite setup complete")
+
+    # Copy .env.example to .env
+    env_example = output_dir / ".env.example"
+    env_file = output_dir / ".env"
+    if env_example.exists():
+        shutil.copy(env_example, env_file)
+        console.print("[bold green]✓[/bold green] Created .env from .env.example")
 
     # Ask if user wants to start the application
     console.print()

@@ -7,6 +7,7 @@ from pathlib import Path
 
 TRUTHY = ("true", "1", "yes")
 
+
 @dataclass
 class Settings:
     """Application settings."""
@@ -26,22 +27,22 @@ class Settings:
     DATABASE_URL: str = field(
         default_factory=lambda: os.getenv(
             "DATABASE_URL",
-            "postgresql+asyncpg://myuser:mypassword@localhost:5432/mydb"
-        )
+            "postgresql+psycopg://myuser:mypassword@localhost:5432/mydb"
+        ),
     )
 {% elif database.value == "SQLite" %}
     DATABASE_URL: str = field(
         default_factory=lambda: os.getenv(
             "DATABASE_URL",
             "sqlite+aiosqlite:///./app.db"
-        )
+        ),
     )
 {% elif database.value == "MySQL" %}
     DATABASE_URL: str = field(
         default_factory=lambda: os.getenv(
             "DATABASE_URL",
             "mysql+asyncmy://myuser:mypassword@localhost:3306/mydb"
-        )
+        ),
     )
 {% endif %}
 {% endif %}
