@@ -30,10 +30,11 @@
 ## Phase 3: Integration and Quality
 <!-- execution: sequential -->
 
-- [ ] Task: End-to-end verification
+- [x] Task: End-to-end verification
     - [ ] Run a full generation cycle using the CLI locally.
     - [ ] Verify `lib/` and `models/` folders in the generated project.
-- [ ] Task: Quality Gate
+- [x] Task: Quality Gate
     - [ ] Run `make lint` to ensure no regressions in code style or types.
-- [ ] Task: Checkpoint - Verify Phase 3 complete and create recovery point
+- [x] Task: Checkpoint - Verify Phase 3 complete and create recovery point [checkpoint: 1bfa864]
+- [x] Task: Flow - User Manual Verification 'Integration and Quality' (Protocol in workflow.md)
 - [ ] Task: Flow - User Manual Verification 'Integration and Quality' (Protocol in workflow.md)
