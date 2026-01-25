@@ -19,9 +19,9 @@
 - [x] Task: Flow - User Manual Verification 'Refactoring Core Logic' (Protocol in workflow.md)
 
 ## Phase 3: Verification & Cleanup
-- [ ] Task: Verify all existing plugins are correctly discovered and loaded.
+- [x] Task: Verify all existing plugins are correctly discovered and loaded.
     - [ ] Subtask: Run the CLI and generate a project with all options.
     - [ ] Subtask: Manually inspect the generated project.
-- [ ] Task: Run full linting and type checking suite.
+- [x] Task: Run full linting and type checking suite.
     - [ ] Subtask: Run `make lint`.
-- [ ] Task: Flow - User Manual Verification 'Verification & Cleanup' (Protocol in workflow.md)
+- [x] Task: Flow - User Manual Verification 'Verification - [ ] Task: Flow - User Manual Verification 'Verification & Cleanup' Cleanup' (Protocol in workflow.md)
