@@ -12,3 +12,4 @@ wheels/
 
 .github/prompts
 docs/prd
+.geminiignore

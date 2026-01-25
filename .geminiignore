@@ -1,0 +1,2 @@
+# Allow Gemini to access Flow specification files
+!.agent/
