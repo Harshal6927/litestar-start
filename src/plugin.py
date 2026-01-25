@@ -39,6 +39,11 @@ class Plugin(Protocol):
         """Short description for the CLI."""
         ...
 
+    @property
+    def path(self) -> Path:
+        """Absolute path to the plugin directory."""
+        ...
+
     def is_applicable(self, config: ProjectConfig) -> bool:
         """Check if the plugin is applicable for the given configuration."""
         ...
@@ -54,6 +59,8 @@ class Plugin(Protocol):
 
 class BasePlugin:
     """Base class for plugins with default implementations."""
+
+    path: Path
 
     @property
     def id(self) -> str:
@@ -113,7 +120,9 @@ def discover_plugins(framework: str) -> list[Plugin]:
                 for attr_name in dir(module):
                     attr = getattr(module, attr_name)
                     if isinstance(attr, type) and issubclass(attr, BasePlugin) and attr is not BasePlugin:
-                        plugins.append(attr())
+                        plugin_instance = attr()
+                        plugin_instance.path = plugins_path / module_name
+                        plugins.append(plugin_instance)
                         break  # Only one plugin per module
             except (ImportError, AttributeError):
                 continue

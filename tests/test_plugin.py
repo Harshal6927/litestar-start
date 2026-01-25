@@ -1,3 +1,4 @@
+from pathlib import Path
 from src.plugin import Plugin, discover_plugins
 
 MIN_PLUGIN_COUNT = 3
@@ -17,3 +18,8 @@ def test_discover_litestar_plugins() -> None:
         assert isinstance(plugin, Plugin)
         assert hasattr(plugin, "name")
         assert hasattr(plugin, "description")
+        # Verify path attribute
+        assert hasattr(plugin, "path"), f"Plugin {plugin.id} missing path attribute"
+        assert isinstance(plugin.path, Path)
+        assert plugin.path.exists()
+        assert plugin.path.is_dir()
