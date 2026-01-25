@@ -3,16 +3,16 @@
 ## Phase 1: Plugin Metadata and Discovery
 <!-- execution: sequential -->
 
-- [ ] Task: Create unit tests for updated plugin discovery logic
+- [x] Task: Create unit tests for updated plugin discovery logic
     - [ ] Define test cases in `tests/test_plugin.py` to verify that `path` is correctly set.
-- [ ] Task: Update Plugin system in `src/plugin.py`
+- [x] Task: Update Plugin system in `src/plugin.py`
     - [ ] Add `path: Path` property to `Plugin` protocol.
     - [ ] Add `path: Path` property to `BasePlugin`.
     - [ ] Update `discover_plugins` to set the absolute directory path for each discovered plugin instance.
-- [ ] Task: Verify Phase 1 passing
+- [x] Task: Verify Phase 1 passing
     - [ ] Run `pytest tests/test_plugin.py`.
-- [ ] Task: Checkpoint - Verify Phase 1 complete and create recovery point
-- [ ] Task: Flow - User Manual Verification 'Plugin Metadata and Discovery' (Protocol in workflow.md)
+- [x] Task: Checkpoint - Verify Phase 1 complete and create recovery point [checkpoint: 856d379]
+- [x] Task: Flow - User Manual Verification 'Plugin Metadata and Discovery' (Protocol in workflow.md)
 
 ## Phase 2: Litestar Generator Logic
 <!-- execution: sequential -->
