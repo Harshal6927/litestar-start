@@ -2,6 +2,25 @@
 
 A Litestar application generated with [litestar-start](https://github.com/Harshal6927/litestar-start).
 
+{% if docker and database.value not in ['None', 'SQLite'] %}
+## Docker start
+
+> NOTE: Ensure dev infra is stopped by `make stop-infra`
+
+Create migrations:
+
+```bash
+litestar database init
+litestar database make-migrations
+```
+
+Build and run the Docker containers:
+
+```bash
+make start
+```
+{% endif %}
+
 ## Features
 
 - ⚡ **Litestar** - High-performance ASGI framework

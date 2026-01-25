@@ -1,14 +1,14 @@
 services:
-{% if database.value == "PostgreSQL" %}
+  {% if database.value == "PostgreSQL" %}
   postgres:
     image: postgres:17.7-alpine3.23
-    container_name: {{ project_slug }}_postgres_db
+    container_name: {{ project_slug }}_postgres_dev_db
     environment:
       POSTGRES_DB: mydb
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
     volumes:
-      - {{ project_slug }}_postgres_db:/var/lib/postgresql/data
+      - {{ project_slug }}_postgres_dev_db:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
@@ -19,18 +19,18 @@ services:
     restart: unless-stopped
 
 volumes:
-  {{ project_slug }}_postgres_db: {}
-{% elif database.value == "MySQL" %}
+  {{ project_slug }}_postgres_dev_db: {}
+  {% elif database.value == "MySQL" %}
   mysql:
     image: mysql:8.4.8-oraclelinux9
-    container_name: {{ project_slug }}_mysql_db
+    container_name: {{ project_slug }}_mysql_dev_db
     environment:
       MYSQL_DATABASE: mydb
       MYSQL_USER: myuser
       MYSQL_PASSWORD: mypassword
       MYSQL_ROOT_PASSWORD: rootpassword
     volumes:
-      - {{ project_slug }}_mysql_db:/var/lib/mysql
+      - {{ project_slug }}_mysql_dev_db:/var/lib/mysql
     ports:
       - "3306:3306"
     healthcheck:
@@ -41,5 +41,5 @@ volumes:
     restart: unless-stopped
 
 volumes:
-  {{ project_slug }}_mysql_db: {}
-{% endif %}
+  {{ project_slug }}_mysql_dev_db: {}
+  {% endif %}

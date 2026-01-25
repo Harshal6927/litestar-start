@@ -204,6 +204,13 @@ def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> 
             )
         console.print("[bold green]✓[/bold green] Docker infrastructure started")
 
+    # Create .dockerignore from .gitignore
+    if config.docker:
+        gitignore = output_dir / ".gitignore"
+        dockerignore = output_dir / ".dockerignore"
+        if gitignore.exists():
+            shutil.copy(gitignore, dockerignore)
+
     # Run plugin post-generation hooks
     generator.post_generate()
 
@@ -212,7 +219,6 @@ def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> 
     env_file = output_dir / ".env"
     if env_example.exists():
         shutil.copy(env_example, env_file)
-        console.print("[bold green]✓[/bold green] Created .env from .env.example")
 
     # Ask if user wants to start the application
     console.print()

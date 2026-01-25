@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.12
+ARG PYTHON_VERSION=3.13
 
 # ------------------------------------------------------------------------------
 # Base stage
@@ -10,7 +10,9 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends tini \
     && apt-get autoremove -y \
     && apt-get clean -y \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /root/.cache \
+    && rm -rf /var/apt/lists/* \
+    && rm -rf /var/cache/apt/* \
     && mkdir -p /workspace/app
 
 # Install uv
@@ -23,10 +25,9 @@ WORKDIR /workspace/app
 # ------------------------------------------------------------------------------
 FROM base AS builder
 
-COPY pyproject.toml ./
-RUN uv sync --no-dev --frozen --no-install-project
-
 COPY . .
+
+RUN uv sync --no-dev --frozen --no-install-project
 
 # ------------------------------------------------------------------------------
 # Runtime stage
@@ -53,5 +54,8 @@ RUN addgroup --system --gid 65532 appgroup \
 USER appuser
 EXPOSE 8000
 
-ENTRYPOINT ["tini", "--"]
-CMD ["litestar", "run", "--host", "0.0.0.0", "--port", "8000"]
+{% if advanced_alchemy %}
+CMD ["sh", "-c", "litestar database upgrade --no-prompt && exec tini -- litestar run --host 0.0.0.0 --port 8000"]
+{% else %}
+CMD ["sh", "-c", "exec tini -- litestar run --host 0.0.0.0 --port 8000"]
+{% endif %}

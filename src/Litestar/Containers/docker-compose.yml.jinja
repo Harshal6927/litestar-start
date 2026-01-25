@@ -9,38 +9,38 @@ services:
     environment:
       - APP_ENV=production
       - DEBUG=false
-{% if has_database %}
-{% if database.value == "PostgreSQL" %}
+    {% if has_database %}
+      {% if database.value == "PostgreSQL" %}
       - DATABASE_URL=postgresql+psycopg://myuser:mypassword@postgres:5432/mydb
-{% elif database.value == "MySQL" %}
+      {% elif database.value == "MySQL" %}
       - DATABASE_URL=mysql+asyncmy://myuser:mypassword@mysql:3306/mydb
-{% elif database.value == "SQLite" %}
+      {% elif database.value == "SQLite" %}
       - DATABASE_URL=sqlite+aiosqlite:///./app.db
-{% endif %}
-{% endif %}
+      {% endif %}
+    {% endif %}
     env_file:
       - .env
-{% if database.value == "PostgreSQL" %}
+    {% if database.value == "PostgreSQL" %}
     depends_on:
       postgres:
         condition: service_healthy
-{% elif database.value == "MySQL" %}
+    {% elif database.value == "MySQL" %}
     depends_on:
       mysql:
         condition: service_healthy
-{% endif %}
+    {% endif %}
     restart: unless-stopped
 
-{% if database.value == "PostgreSQL" %}
+  {% if database.value == "PostgreSQL" %}
   postgres:
-    image: postgres:17-alpine
-    container_name: {{ project_slug }}_postgres
+    image: postgres:17.7-alpine3.23
+    container_name: {{ project_slug }}_postgres_db
     environment:
       POSTGRES_DB: mydb
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - {{ project_slug }}_postgres_db:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
@@ -49,17 +49,17 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-{% elif database.value == "MySQL" %}
+  {% elif database.value == "MySQL" %}
   mysql:
-    image: mysql:8.0
-    container_name: {{ project_slug }}_mysql
+    image: mysql:8.4.8-oraclelinux9
+    container_name: {{ project_slug }}_mysql_db
     environment:
       MYSQL_DATABASE: mydb
       MYSQL_USER: myuser
       MYSQL_PASSWORD: mypassword
       MYSQL_ROOT_PASSWORD: rootpassword
     volumes:
-      - mysql_data:/var/lib/mysql
+      - {{ project_slug }}_mysql_db:/var/lib/mysql
     ports:
       - "3306:3306"
     healthcheck:
@@ -68,12 +68,12 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-{% endif %}
+  {% endif %}
 
 {% if database.value == "PostgreSQL" %}
 volumes:
-  postgres_data: {}
+  {{ project_slug }}_postgres_db: {}
 {% elif database.value == "MySQL" %}
 volumes:
-  mysql_data: {}
+  {{ project_slug }}_mysql_db: {}
 {% endif %}

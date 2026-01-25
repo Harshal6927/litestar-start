@@ -22,3 +22,17 @@ stop-infra:
 	docker compose -f $(INFRA_COMPOSE_FILE) down
 	@echo "Infrastructure stopped. ✅"
 {% endif %}
+
+{% if docker %}
+.PHONY: start
+start:
+	@echo "Starting application with Docker... 🔄"
+	docker compose up -d
+	@echo "Application started. ✅"
+
+.PHONY: stop
+stop:
+	@echo "Stopping application with Docker... 🔄
+	docker compose down
+	@echo "Application stopped. ✅"
+{% endif %}
