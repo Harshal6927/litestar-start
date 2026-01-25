@@ -22,5 +22,4 @@ class LitestarVitePlugin(BasePlugin):
             ["uv", "run", "litestar", "assets", "init"],  # noqa: S607
             cwd=output_dir,
             check=True,
-            capture_output=True,
         )

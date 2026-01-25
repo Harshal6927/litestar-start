@@ -121,11 +121,11 @@ def ask_plugins(config: ProjectConfig, discovered_plugins: list[Plugin]) -> list
         SystemExit: If the user cancels the operation.
 
     """
-    choices = []
-
-    for plugin in discovered_plugins:
-        if plugin.is_applicable(config):
-            choices.append(questionary.Choice(title=plugin.name, value=plugin.id))
+    choices = [
+        questionary.Choice(title=plugin.name, value=plugin.id)
+        for plugin in discovered_plugins
+        if plugin.is_applicable(config)
+    ]
 
     if not choices:
         return []

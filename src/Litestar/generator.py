@@ -131,15 +131,13 @@ class LitestarGenerator:
 
     def _generate_plugins(self, context: dict) -> None:
         """Generate plugin-specific files."""
-        plugins_dir = self.litestar_dir / "Plugins"
+        for plugin in self.plugins:
+            if self.config.has_plugin(plugin.id):
+                templates_dir = plugin.path / "Templates"
 
-        for plugin_id in self.config.plugins:
-            plugin_dir = plugins_dir / plugin_id
-            templates_dir = plugin_dir / "Templates"
-
-            if templates_dir.exists():
-                env = get_template_env(templates_dir)
-                self._render_templates(templates_dir, self.output_dir, env, context)
+                if templates_dir.exists():
+                    env = get_template_env(templates_dir)
+                    self._render_templates(templates_dir, self.output_dir, env, context)
 
     def _generate_containers(self, context: dict) -> None:
         """Generate Docker-related files."""
