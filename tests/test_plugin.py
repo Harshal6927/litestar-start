@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from src.plugin import Plugin, discover_plugins
 
 MIN_PLUGIN_COUNT = 3

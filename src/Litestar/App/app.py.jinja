@@ -31,7 +31,7 @@ app = Litestar(
     openapi_config=OpenAPIConfig(
         title=settings.APP_NAME,
         version="0.1.0",
-        path="/api",
+        path="/schema",
         render_plugins=[ScalarRenderPlugin()],
     ),
     logging_config=LoggingConfig(
