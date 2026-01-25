@@ -25,3 +25,14 @@
 ## Context for AI Assistants
 
 - {Important context}
+
+## [2026-01-24] Patterns from refine-cli-structure-and-improve-plugin-discovery-logic
+
+### Code Conventions
+- Use a `Plugin` Protocol to define a strict interface for extensions.
+- Automatically generate snake_case IDs from CamelCase class names to maintain template variable consistency.
+- Use `pkgutil` and `importlib` for dynamic module discovery in a specific directory.
+
+### Architecture
+- Decouple CLI orchestration from specific plugin logic by using a discovery mechanism.
+- Use post-generation hooks in plugins to handle specialized setup tasks.
