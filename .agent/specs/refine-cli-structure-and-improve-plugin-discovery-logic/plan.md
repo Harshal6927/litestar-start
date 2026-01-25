@@ -1,13 +1,13 @@
 # Implementation Plan - Refine CLI structure and improve plugin discovery logic
 
 ## Phase 1: Analysis & Design
-- [ ] Task: Analyze current CLI structure in `src/cli.py` and plugin handling in `src/generator.py`.
+- [x] Task: Analyze current CLI structure in `src/cli.py` and plugin handling in `src/generator.py`.
     - [ ] Subtask: Read and document existing control flow.
     - [ ] Subtask: Identify coupling points between CLI and specific plugins.
-- [ ] Task: Design the new plugin interface and discovery mechanism.
+- [x] Task: Design the new plugin interface and discovery mechanism.
     - [ ] Subtask: Draft a `Plugin` protocol/base class.
     - [ ] Subtask: Prototype discovery logic using `importlib`.
-- [ ] Task: Flow - User Manual Verification 'Analysis & Design' (Protocol in workflow.md)
+- [x] Task: Flow - User Manual Verification 'Analysis - [ ] Task: Flow - User Manual Verification 'Analysis & Design' Design' (Protocol in workflow.md)
 
 ## Phase 2: Refactoring Core Logic
 - [ ] Task: Refactor `src/generator.py` to use the new plugin discovery logic.
@@ -16,7 +16,7 @@
 - [ ] Task: Refactor `src/cli.py` to utilize the new generator capabilities.
     - [ ] Subtask: Remove hardcoded plugin references.
     - [ ] Subtask: Update `ProjectConfig` model if necessary.
-- [ ] Task: Flow - User Manual Verification 'Refactoring Core Logic' (Protocol in workflow.md)
+- [x] Task: Flow - User Manual Verification 'Refactoring Core Logic' (Protocol in workflow.md)
 
 ## Phase 3: Verification & Cleanup
 - [ ] Task: Verify all existing plugins are correctly discovered and loaded.

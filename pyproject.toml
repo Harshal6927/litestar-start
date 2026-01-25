@@ -41,9 +41,13 @@ line-length = 120
 lint.ignore = [
     "CPY001",  # Missing copyright notice
     "D100",    # Undocumented public module
+    "D104",    # Undocumented public package
     "PLC0415", # Import outside top level
     "PLR0911", # Too many return statements
+    "S101",    # Use of assert detected
+    "SLF001",  # Private member accessed
+    "RUF067",  # `__init__` module should only contain docstrings
 ]
 
 [dependency-groups]
-dev = ["pre-commit>=4.5.1", "ruff>=0.14.11", "ty>=0.0.11"]
+dev = ["pre-commit>=4.5.1", "pytest>=9.0.2", "pytest-mock>=3.15.1", "ruff>=0.14.11", "ty>=0.0.11"]

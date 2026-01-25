@@ -5,6 +5,7 @@ from pathlib import Path
 from jinja2 import Environment
 
 from src.models import DatabaseConfig, ProjectConfig
+from src.plugin import discover_plugins
 from src.utils import get_package_dir, get_template_env, write_file
 
 
@@ -22,6 +23,7 @@ class LitestarGenerator:
         self.config = config
         self.output_dir = output_dir
         self.litestar_dir = get_package_dir() / "Litestar"
+        self.plugins = discover_plugins("Litestar")
 
     def _get_template_context(self) -> dict:
         """Build the template context.
@@ -32,19 +34,28 @@ class LitestarGenerator:
         """
         db_config = DatabaseConfig.for_database(self.config.database)
 
-        return {
+        context = {
             "project": self.config,
             "project_name": self.config.name,
             "project_slug": self.config.slug,
             "database": self.config.database,
             "db_config": db_config,
-            "advanced_alchemy": self.config.has_advanced_alchemy,
-            "litestar_vite": self.config.has_litestar_vite,
-            "litestar_saq": self.config.has_litestar_saq,
             "has_database": self.config.database.value != "None",
             "docker": self.config.docker,
             "docker_infra": self.config.docker_infra,
         }
+
+        # Add plugin-specific context
+        for plugin in self.plugins:
+            # Set boolean flag for all discovered plugins (True if enabled)
+            enabled = self.config.has_plugin(plugin.id)
+            context[plugin.id.lower()] = enabled
+
+            # If enabled, let the plugin add its own context
+            if enabled:
+                context.update(plugin.get_template_context(self.config))
+
+        return context
 
     def _render_templates(
         self,
@@ -92,6 +103,12 @@ class LitestarGenerator:
         if self.config.docker or self.config.needs_docker_infra:
             self._generate_containers(context)
 
+    def post_generate(self) -> None:
+        """Run post-generation tasks for enabled plugins."""
+        for plugin in self.plugins:
+            if self.config.has_plugin(plugin.id):
+                plugin.post_generate(self.config, self.output_dir)
+
     def _generate_config(self, context: dict) -> None:
         """Generate configuration files (pyproject.toml, .gitignore, etc.)."""
         config_dir = self.litestar_dir / "Config"
@@ -116,8 +133,8 @@ class LitestarGenerator:
         """Generate plugin-specific files."""
         plugins_dir = self.litestar_dir / "Plugins"
 
-        for plugin in self.config.plugins:
-            plugin_dir = plugins_dir / plugin.value
+        for plugin_id in self.config.plugins:
+            plugin_dir = plugins_dir / plugin_id
             templates_dir = plugin_dir / "Templates"
 
             if templates_dir.exists():

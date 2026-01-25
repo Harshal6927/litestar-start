@@ -22,21 +22,13 @@ class Database(StrEnum):
     NONE = "None"
 
 
-class Plugin(StrEnum):
-    """Available plugins."""
-
-    ADVANCED_ALCHEMY = "AdvancedAlchemy"
-    LITESTAR_SAQ = "LitestarSAQ"
-    LITESTAR_VITE = "LitestarVite"
-
-
 class ProjectConfig(msgspec.Struct):
     """Configuration for a new project."""
 
     name: str
     framework: Framework
     database: Database
-    plugins: list[Plugin]
+    plugins: list[str]
     docker: bool
     docker_infra: bool
 
@@ -45,20 +37,17 @@ class ProjectConfig(msgspec.Struct):
         """Return project name as a valid Python package name."""
         return self.name.lower().replace("-", "_").replace(" ", "_")
 
-    @property
-    def has_advanced_alchemy(self) -> bool:
-        """Check if AdvancedAlchemy plugin is enabled."""
-        return Plugin.ADVANCED_ALCHEMY in self.plugins
+    def has_plugin(self, plugin_id: str) -> bool:
+        """Check if a plugin is enabled.
 
-    @property
-    def has_litestar_vite(self) -> bool:
-        """Check if LitestarVite plugin is enabled."""
-        return Plugin.LITESTAR_VITE in self.plugins
+        Args:
+            plugin_id: The ID of the plugin to check.
 
-    @property
-    def has_litestar_saq(self) -> bool:
-        """Check if LitestarSAQ plugin is enabled."""
-        return Plugin.LITESTAR_SAQ in self.plugins
+        Returns:
+            True if the plugin is enabled, False otherwise.
+
+        """
+        return plugin_id in self.plugins
 
     @property
     def needs_docker_infra(self) -> bool:

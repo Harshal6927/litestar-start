@@ -18,6 +18,7 @@ class ProjectGenerator:
         """
         self.config = config
         self.output_dir = output_dir
+        self._framework_generator = None
 
     def generate(self) -> None:
         """Generate the project based on configuration."""
@@ -28,8 +29,13 @@ class ProjectGenerator:
         if self.config.framework == Framework.LITESTAR:
             from src.Litestar.generator import LitestarGenerator
 
-            generator = LitestarGenerator(self.config, self.output_dir)
-            generator.generate()
+            self._framework_generator = LitestarGenerator(self.config, self.output_dir)
+            self._framework_generator.generate()
         else:
             msg = f"Framework {self.config.framework} is not yet supported"
             raise NotImplementedError(msg)
+
+    def post_generate(self) -> None:
+        """Run post-generation tasks."""
+        if self._framework_generator and hasattr(self._framework_generator, "post_generate"):
+            self._framework_generator.post_generate()

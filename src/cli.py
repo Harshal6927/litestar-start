@@ -10,7 +10,8 @@ from rich.panel import Panel
 from rich.text import Text
 
 from src.generator import ProjectGenerator
-from src.models import Database, Framework, Plugin, ProjectConfig
+from src.models import Database, Framework, ProjectConfig
+from src.plugin import Plugin, discover_plugins
 from src.utils import validate_project_name
 
 console = Console()
@@ -106,14 +107,15 @@ def ask_database() -> Database:
     return result
 
 
-def ask_plugins(database: Database) -> list[Plugin]:
+def ask_plugins(config: ProjectConfig, discovered_plugins: list[Plugin]) -> list[str]:
     """Ask for plugins to install.
 
     Args:
-        database: The selected database to determine plugin availability.
+        config: The project configuration (partial).
+        discovered_plugins: List of discovered plugins.
 
     Returns:
-        A list of selected plugins.
+        A list of selected plugin IDs.
 
     Raises:
         SystemExit: If the user cancels the operation.
@@ -121,17 +123,9 @@ def ask_plugins(database: Database) -> list[Plugin]:
     """
     choices = []
 
-    # AdvancedAlchemy only makes sense with a database
-    if database != Database.NONE:
-        choices.append(questionary.Choice(title="AdvancedAlchemy (ORM)", value=Plugin.ADVANCED_ALCHEMY))
-
-    # Add other plugins
-    choices.extend(
-        [
-            questionary.Choice(title="Litestar SAQ (Background Tasks)", value=Plugin.LITESTAR_SAQ),
-            questionary.Choice(title="Litestar Vite (Frontend Integration)", value=Plugin.LITESTAR_VITE),
-        ],
-    )
+    for plugin in discovered_plugins:
+        if plugin.is_applicable(config):
+            choices.append(questionary.Choice(title=plugin.name, value=plugin.id))
 
     if not choices:
         return []
@@ -179,14 +173,16 @@ def ask_docker() -> tuple[bool, bool]:
     return docker, docker_infra
 
 
-def run_post_generation_setup(config: ProjectConfig, output_dir: Path) -> None:
+def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> None:
     """Run post-generation setup commands.
 
     Args:
-        config: The project configuration.
+        generator: The project generator instance.
         output_dir: The output directory for the project.
 
     """
+    config = generator.config
+
     # Initialize git repository
     with console.status("[bold green]Initializing git repository..."):
         subprocess.run(["git", "init"], cwd=output_dir, check=True, capture_output=True)  # noqa: S607
@@ -208,15 +204,8 @@ def run_post_generation_setup(config: ProjectConfig, output_dir: Path) -> None:
             )
         console.print("[bold green]✓[/bold green] Docker infrastructure started")
 
-    # Run Litestar Vite setup if needed
-    if Plugin.LITESTAR_VITE in config.plugins:
-        console.print("[bold green]Setting up Litestar Vite...[/bold green]")
-        subprocess.run(
-            ["uv", "run", "litestar", "assets", "init"],  # noqa: S607
-            cwd=output_dir,
-            check=True,
-        )
-        console.print("[bold green]✓[/bold green] Litestar Vite setup complete")
+    # Run plugin post-generation hooks
+    generator.post_generate()
 
     # Copy .env.example to .env
     env_example = output_dir / ".env.example"
@@ -256,18 +245,26 @@ def main() -> None:
         name = ask_project_name()
         framework = ask_framework()
         database = ask_database()
-        plugins = ask_plugins(database)
-        docker, docker_infra = ask_docker()
 
-        # Create project config
+        # Discover plugins early to pass to ask_plugins
+        discovered_plugins = discover_plugins(framework.value)
+
+        # Create partial project config to check applicability
         config = ProjectConfig(
             name=name,
             framework=framework,
             database=database,
-            plugins=plugins,
-            docker=docker,
-            docker_infra=docker_infra,
+            plugins=[],  # Will be populated next
+            docker=False,  # Placeholder
+            docker_infra=False,  # Placeholder
         )
+
+        plugins = ask_plugins(config, discovered_plugins)
+        config.plugins = plugins
+
+        docker, docker_infra = ask_docker()
+        config.docker = docker
+        config.docker_infra = docker_infra
 
         # Show summary
         console.print()
@@ -276,7 +273,7 @@ def main() -> None:
                 f"[bold]Project:[/bold] {config.name}\n"
                 f"[bold]Framework:[/bold] {config.framework.value}\n"
                 f"[bold]Database:[/bold] {config.database.value}\n"
-                f"[bold]Plugins:[/bold] {', '.join(p.value for p in config.plugins) or 'None'}\n"
+                f"[bold]Plugins:[/bold] {', '.join(config.plugins) or 'None'}\n"
                 f"[bold]Docker:[/bold] {'Yes' if config.docker else 'No'}\n"
                 f"[bold]Docker Infra:[/bold] {'Yes' if config.docker_infra else 'No'}",
                 title="Configuration Summary",
@@ -302,7 +299,7 @@ def main() -> None:
         console.print()
 
         # Run post-generation setup
-        run_post_generation_setup(config, output_dir)
+        run_post_generation_setup(generator, output_dir)
 
     except KeyboardInterrupt:
         console.print("\n[yellow]Cancelled.[/yellow]")
