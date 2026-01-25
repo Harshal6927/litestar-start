@@ -37,4 +37,3 @@
     - [ ] Run `make lint` to ensure no regressions in code style or types.
 - [x] Task: Checkpoint - Verify Phase 3 complete and create recovery point [checkpoint: 1bfa864]
 - [x] Task: Flow - User Manual Verification 'Integration and Quality' (Protocol in workflow.md)
-- [ ] Task: Flow - User Manual Verification 'Integration and Quality' (Protocol in workflow.md)
