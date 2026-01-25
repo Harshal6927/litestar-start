@@ -7,6 +7,8 @@ Each track has its own detailed spec and plan in its respective folder.
 
 ---
 
-- [ ] **Track: Plugin Template Rendering Fix**
-*Link: [./specs/plugin-template-rendering-fix_20260125/](./specs/plugin-template-rendering-fix_20260125/)*
+## Archived
+
+- [x] **Track: Plugin Template Rendering Fix**
+*Link: [./archive/plugin-template-rendering-fix_20260125/](./archive/plugin-template-rendering-fix_20260125/)*
 *Risk Level: [low]*
