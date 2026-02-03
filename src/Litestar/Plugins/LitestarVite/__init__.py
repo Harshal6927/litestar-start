@@ -23,6 +23,7 @@ class LitestarVitePlugin(BasePlugin):
             cwd=output_dir,
             check=True,
         )
+        self._update_app_config(output_dir / "app.py")
 
     def _update_app_config(self, app_path: Path) -> None:
         """Update app.py to use the full Vite config from config.py."""
