@@ -16,7 +16,7 @@ class LitestarVitePlugin(BasePlugin):
     def description(self) -> str:  # noqa: D102
         return "Vite integration for frontend assets in Litestar"
 
-    def post_generate(self, config: ProjectConfig, output_dir: Path) -> None:  # noqa: ARG002, PLR6301
+    def post_generate(self, config: ProjectConfig, output_dir: Path) -> None:  # noqa: ARG002
         """Run Litestar Vite setup."""
         subprocess.run(
             ["uv", "run", "litestar", "assets", "init", "--frontend-dir", "frontend"],  # noqa: S607
@@ -30,7 +30,7 @@ class LitestarVitePlugin(BasePlugin):
         if not app_path.exists():
             return
 
-        content = app_path.read_text()
+        content = app_path.read_text(encoding="utf-8")
 
         # Update imports
         if "from config import settings" in content and "vite_config" not in content:
@@ -49,4 +49,4 @@ class LitestarVitePlugin(BasePlugin):
         if bootstrap_config in content:
             content = content.replace(bootstrap_config, full_config)
 
-        app_path.write_text(content)
+        app_path.write_text(content, encoding="utf-8")
