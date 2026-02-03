@@ -54,3 +54,42 @@ def test_update_app_config_idempotent(app_file: Path) -> None:
 
     assert first_run_content == second_run_content
     assert "from config import settings, vite_config" in second_run_content
+
+
+def test_post_generate(tmp_path: Path, mocker) -> None:
+    """Test post_generate calls subprocess and updates app config in correct location."""
+    plugin = LitestarVitePlugin()
+
+    # Mock subprocess.run
+    mock_run = mocker.patch("subprocess.run")
+
+    # Mock ProjectConfig
+    config = mocker.Mock()
+
+    # Setup src/backend/app.py
+    backend_dir = tmp_path / "src" / "backend"
+    backend_dir.mkdir(parents=True)
+    app_file = backend_dir / "app.py"
+
+    content = dedent("""
+    from litestar import Litestar
+    from config import settings
+    from litestar_vite import ViteConfig, VitePlugin
+
+    app = Litestar(
+        plugins=[VitePlugin(config=ViteConfig(dev_mode=settings.DEBUG))],
+    )
+    """)
+    app_file.write_text(content.strip())
+
+    plugin.post_generate(config, tmp_path)
+
+    # Verify subprocess call
+    mock_run.assert_called_once()
+    args, kwargs = mock_run.call_args
+    assert args[0] == ["uv", "run", "litestar", "assets", "init", "--frontend-dir", "src/frontend"]
+    assert kwargs["cwd"] == tmp_path
+
+    # Verify app.py update
+    updated_content = app_file.read_text(encoding="utf-8")
+    assert "VitePlugin(config=vite_config)" in updated_content

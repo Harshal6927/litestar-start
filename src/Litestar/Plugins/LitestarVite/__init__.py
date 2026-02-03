@@ -19,11 +19,11 @@ class LitestarVitePlugin(BasePlugin):
     def post_generate(self, config: ProjectConfig, output_dir: Path) -> None:  # noqa: ARG002
         """Run Litestar Vite setup."""
         subprocess.run(
-            ["uv", "run", "litestar", "assets", "init", "--frontend-dir", "frontend"],  # noqa: S607
+            ["uv", "run", "litestar", "assets", "init", "--frontend-dir", "src/frontend"],  # noqa: S607
             cwd=output_dir,
             check=True,
         )
-        self._update_app_config(output_dir / "app.py")
+        self._update_app_config(output_dir / "src" / "backend" / "app.py")
 
     def _update_app_config(self, app_path: Path) -> None:
         """Update app.py to use the full Vite config from config.py."""
