@@ -23,3 +23,23 @@ class LitestarVitePlugin(BasePlugin):
             cwd=output_dir,
             check=True,
         )
+
+    def _update_app_config(self, app_path: Path) -> None:
+        """Update app.py to use the full Vite config from config.py."""
+        if not app_path.exists():
+            return
+
+        content = app_path.read_text()
+
+        # Update imports
+        if "from config import settings" in content and "vite_config" not in content:
+            content = content.replace("from config import settings", "from config import settings, vite_config")
+
+        # Update plugin config
+        bootstrap_config = "VitePlugin(config=ViteConfig(dev_mode=settings.DEBUG))"
+        full_config = "VitePlugin(config=vite_config)"
+
+        if bootstrap_config in content:
+            content = content.replace(bootstrap_config, full_config)
+
+        app_path.write_text(content)
