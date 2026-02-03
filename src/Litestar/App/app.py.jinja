@@ -4,12 +4,12 @@ from litestar import Litestar, get
 from litestar.logging import LoggingConfig
 from litestar.openapi import OpenAPIConfig
 from litestar.openapi.plugins import ScalarRenderPlugin
-from config import settings
+from .config import settings
 {% if advanced_alchemy %}
 from advanced_alchemy.exceptions import RepositoryError
-from config import alchemy
-from lib import exception_handler
-from controllers import UserController
+from .config import alchemy
+from .lib import exception_handler
+from .controllers import UserController
 {% endif %}
 {% if litestar_vite %}
 from litestar_vite import ViteConfig, VitePlugin
