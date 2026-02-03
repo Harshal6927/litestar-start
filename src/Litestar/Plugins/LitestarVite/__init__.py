@@ -33,8 +33,8 @@ class LitestarVitePlugin(BasePlugin):
         content = app_path.read_text(encoding="utf-8")
 
         # Update imports
-        if "from config import settings" in content and "vite_config" not in content:
-            content = content.replace("from config import settings", "from config import settings, vite_config")
+        if "from .config import settings" in content and "vite_config" not in content:
+            content = content.replace("from .config import settings", "from .config import settings, vite_config")
 
         if "from litestar_vite import ViteConfig, VitePlugin" in content:
             content = content.replace(

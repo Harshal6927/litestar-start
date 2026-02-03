@@ -3,8 +3,8 @@ from litestar import delete, get, patch, post
 from litestar.controller import Controller
 from litestar.di import Provide
 
-from lib import UserService, provide_user_service
-from schemas import CreateUser, ReadUser, UpdateUser
+from ..lib import UserService, provide_user_service
+from ..schemas import CreateUser, ReadUser, UpdateUser
 
 
 class UserController(Controller):

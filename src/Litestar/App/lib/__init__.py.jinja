@@ -1,9 +1,9 @@
 """Application library utilities."""
 
 {% if advanced_alchemy %}
-from lib.dependencies import provide_user_service
-from lib.services import UserService
-from lib.utils import exception_handler
+from .dependencies import provide_user_service
+from .services import UserService
+from .utils import exception_handler
 
 __all__ = [
     "UserService",

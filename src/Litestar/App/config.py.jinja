@@ -31,7 +31,7 @@ vite_config = ViteConfig(
     dev_mode=True,
     types=True,
     paths=PathConfig(
-        root=Path(__file__).parent,
+        root=Path(__file__).parent.parent.parent / "src" / "frontend",
         resource_dir="src",
         bundle_dir="public",
     ),
