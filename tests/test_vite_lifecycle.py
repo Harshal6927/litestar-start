@@ -1,19 +1,13 @@
+import pytest
 from pathlib import Path
 from textwrap import dedent
-
-import pytest
 
 from src.Litestar.Plugins.LitestarVite import LitestarVitePlugin
 
 
 @pytest.fixture
-def app_file(tmp_path: Path) -> Path:
-    """Create a temporary app.py file with bootstrap configuration.
-
-    Returns:
-        Path to the created app.py file.
-
-    """
+def app_file(tmp_path):
+    """Create a temporary app.py file with bootstrap configuration."""
     content = dedent("""
     from litestar import Litestar
     from config import settings
@@ -40,6 +34,8 @@ def test_update_app_config(app_file: Path) -> None:
 
     # Check imports
     assert "from config import settings, vite_config" in updated_content
+    assert "from litestar_vite import VitePlugin" in updated_content
+    assert "from litestar_vite import ViteConfig, VitePlugin" not in updated_content
 
     # Check plugin config
     assert "VitePlugin(config=vite_config)" in updated_content
