@@ -127,7 +127,7 @@ class LitestarGenerator:
         app_dir = self.litestar_dir / "App"
         env = get_template_env(app_dir)
 
-        self._render_templates(app_dir, self.output_dir, env, context)
+        self._render_templates(app_dir, self.output_dir / "src" / "backend", env, context)
 
     def _generate_plugins(self, context: dict) -> None:
         """Generate plugin-specific files."""
@@ -137,7 +137,7 @@ class LitestarGenerator:
 
                 if templates_dir.exists():
                     env = get_template_env(templates_dir)
-                    self._render_templates(templates_dir, self.output_dir, env, context)
+                    self._render_templates(templates_dir, self.output_dir / "src" / "backend", env, context)
 
     def _generate_containers(self, context: dict) -> None:
         """Generate Docker-related files."""
