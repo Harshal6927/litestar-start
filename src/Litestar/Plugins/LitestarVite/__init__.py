@@ -19,7 +19,7 @@ class LitestarVitePlugin(BasePlugin):
     def post_generate(self, config: ProjectConfig, output_dir: Path) -> None:  # noqa: ARG002, PLR6301
         """Run Litestar Vite setup."""
         subprocess.run(
-            ["uv", "run", "litestar", "assets", "init"],  # noqa: S607
+            ["uv", "run", "litestar", "assets", "init", "--frontend-dir", "frontend"],  # noqa: S607
             cwd=output_dir,
             check=True,
         )

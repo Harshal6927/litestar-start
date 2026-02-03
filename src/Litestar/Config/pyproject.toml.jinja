@@ -18,7 +18,7 @@ dependencies = [
 {% endif %}
 {% endif %}
 {% if litestar_vite %}
-    "litestar-vite>=0.16.4",
+    "litestar-vite",
 {% endif %}
 ]
 
@@ -30,6 +30,11 @@ lint.ignore = [
     "PLC0415",   # Import outside top level
     "PLR0911",   # Too many return statements
 ]
+
+{% if litestar_vite %}
+[tool.uv.sources]
+litestar-vite = { git = "https://github.com/litestar-org/litestar-vite.git", rev = "4dd874c936dbb285afed508916e2d2dd447b2567" }
+{% endif %}
 
 [dependency-groups]
 dev = ["pre-commit>=4.5.1", "ruff>=0.14.13", "ty>=0.0.12"]
