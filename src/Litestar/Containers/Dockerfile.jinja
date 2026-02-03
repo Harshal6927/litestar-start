@@ -35,16 +35,14 @@ RUN uv sync --no-dev --frozen --no-install-project
 FROM base AS runtime
 
 ENV PATH="/workspace/app/.venv/bin:$PATH" \
+    PYTHONPATH="/workspace/app/src/backend:$PYTHONPATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONFAULTHANDLER=1 \
     PYTHONHASHSEED=random
 
 COPY --from=builder /workspace/app/.venv ./.venv
-COPY --from=builder /workspace/app/app ./app
-{% if advanced_alchemy %}
-COPY --from=builder /workspace/app/models ./models
-{% endif %}
+COPY --from=builder /workspace/app/src/backend ./src/backend
 
 # Create non-root user
 RUN addgroup --system --gid 65532 appgroup \

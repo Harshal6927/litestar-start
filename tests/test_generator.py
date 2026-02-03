@@ -59,11 +59,11 @@ def test_litestar_generator_plugins_rendering(tmp_path: Path) -> None:
 
     # Verify base files
     assert (tmp_path / "pyproject.toml").exists()
-    assert (tmp_path / "app.py").exists()
+    assert (tmp_path / "src" / "backend" / "app.py").exists()
 
     # Verify AdvancedAlchemy plugin files
     # These are in src/Litestar/Plugins/AdvancedAlchemy/Templates/
-    # Should be rendered to root of tmp_path (merging directories)
-    assert (tmp_path / "models" / "users.py").exists()
-    assert (tmp_path / "lib" / "dependencies.py").exists()
-    assert (tmp_path / "lib" / "services.py").exists()
+    # Should be rendered to src/backend of tmp_path
+    assert (tmp_path / "src" / "backend" / "models" / "users.py").exists()
+    assert (tmp_path / "src" / "backend" / "lib" / "dependencies.py").exists()
+    assert (tmp_path / "src" / "backend" / "lib" / "services.py").exists()

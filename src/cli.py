@@ -211,14 +211,14 @@ def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> 
         if gitignore.exists():
             shutil.copy(gitignore, dockerignore)
 
-    # Run plugin post-generation hooks
-    generator.post_generate()
-
     # Copy .env.example to .env
     env_example = output_dir / ".env.example"
     env_file = output_dir / ".env"
     if env_example.exists():
         shutil.copy(env_example, env_file)
+
+    # Run plugin post-generation hooks
+    generator.post_generate()
 
     # Ask if user wants to start the application
     console.print()
