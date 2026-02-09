@@ -44,7 +44,7 @@ services:
 
   {% if database.value == "PostgreSQL" %}
   postgres:
-    image: postgres:17.7-alpine3.23
+    image: {{ db_config.docker_image }}
     container_name: {{ project_slug }}_postgres_db
     environment:
       POSTGRES_DB: mydb
@@ -62,7 +62,7 @@ services:
     restart: unless-stopped
   {% elif database.value == "MySQL" %}
   mysql:
-    image: mysql:8.4.8-oraclelinux9
+    image: {{ db_config.docker_image }}
     container_name: {{ project_slug }}_mysql_db
     environment:
       MYSQL_DATABASE: mydb

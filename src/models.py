@@ -90,7 +90,7 @@ class DatabaseConfig(msgspec.Struct):
                 driver="postgresql+psycopg",
                 port=5432,
                 default_url="postgresql+psycopg://myuser:mypassword@localhost:5432/mydb",
-                docker_image="postgres:18.1",
+                docker_image="postgres:17.7-alpine3.23",
             ),
             Database.SQLITE: cls(
                 driver="sqlite+aiosqlite",
@@ -102,7 +102,7 @@ class DatabaseConfig(msgspec.Struct):
                 driver="mysql+asyncmy",
                 port=3306,
                 default_url="mysql+asyncmy://myuser:mypassword@localhost:3306/mydb",
-                docker_image="mysql:lts-oraclelinux9",
+                docker_image="mysql:8.4.8-oraclelinux9",
             ),
         }
         return configs.get(db)
