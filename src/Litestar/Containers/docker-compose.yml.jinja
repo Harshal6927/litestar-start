@@ -18,22 +18,33 @@ services:
       - DATABASE_URL=sqlite+aiosqlite:///./app.db
       {% endif %}
     {% endif %}
+    {% if has_store %}
+      - REDIS_URL=redis://{{ project_slug }}_{{ memory_store.value|lower }}:6379/0
+    {% endif %}
     env_file:
       - .env
-    {% if database.value == "PostgreSQL" %}
+    {% if (database.value == "PostgreSQL" or database.value == "MySQL") or has_store %}
     depends_on:
+      {% if database.value == "PostgreSQL" %}
       postgres:
         condition: service_healthy
-    {% elif database.value == "MySQL" %}
-    depends_on:
+      {% elif database.value == "MySQL" %}
       mysql:
         condition: service_healthy
+      {% endif %}
+      {% if memory_store.value == "Redis" %}
+      redis:
+        condition: service_healthy
+      {% elif memory_store.value == "Valkey" %}
+      valkey:
+        condition: service_healthy
+      {% endif %}
     {% endif %}
     restart: unless-stopped
 
   {% if database.value == "PostgreSQL" %}
   postgres:
-    image: postgres:17.7-alpine3.23
+    image: {{ db_config.docker_image }}
     container_name: {{ project_slug }}_postgres_db
     environment:
       POSTGRES_DB: mydb
@@ -51,7 +62,7 @@ services:
     restart: unless-stopped
   {% elif database.value == "MySQL" %}
   mysql:
-    image: mysql:8.4.8-oraclelinux9
+    image: {{ db_config.docker_image }}
     container_name: {{ project_slug }}_mysql_db
     environment:
       MYSQL_DATABASE: mydb
@@ -64,6 +75,32 @@ services:
       - "3306:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+  {% endif %}
+
+  {% if memory_store.value == "Redis" %}
+  redis:
+    image: {{ store_config.docker_image }}
+    container_name: {{ project_slug }}_redis
+    ports:
+      - "{{ store_config.port }}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+  {% elif memory_store.value == "Valkey" %}
+  valkey:
+    image: {{ store_config.docker_image }}
+    container_name: {{ project_slug }}_valkey
+    ports:
+      - "{{ store_config.port }}:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -10,7 +10,7 @@ from rich.panel import Panel
 from rich.text import Text
 
 from src.generator import ProjectGenerator
-from src.models import Database, Framework, ProjectConfig
+from src.models import Database, Framework, MemoryStore, ProjectConfig
 from src.plugin import Plugin, discover_plugins
 from src.utils import validate_project_name
 
@@ -97,6 +97,34 @@ def ask_database() -> Database:
 
     result = questionary.select(
         "Select database:",
+        choices=choices,
+    ).ask()
+
+    if result is None:
+        console.print("\n[yellow]Cancelled.[/yellow]")
+        raise SystemExit(0)
+
+    return result
+
+
+def ask_memory_store() -> MemoryStore:
+    """Ask for the memory store choice.
+
+    Returns:
+        The selected memory store.
+
+    Raises:
+        SystemExit: If the user cancels the operation.
+
+    """
+    choices = [
+        questionary.Choice(title="Redis", value=MemoryStore.REDIS),
+        questionary.Choice(title="Valkey", value=MemoryStore.VALKEY),
+        questionary.Choice(title="None", value=MemoryStore.NONE),
+    ]
+
+    result = questionary.select(
+        "Select memory store:",
         choices=choices,
     ).ask()
 
@@ -251,6 +279,7 @@ def main() -> None:
         name = ask_project_name()
         framework = ask_framework()
         database = ask_database()
+        memory_store = ask_memory_store()
 
         # Discover plugins early to pass to ask_plugins
         discovered_plugins = discover_plugins(framework.value)
@@ -260,6 +289,7 @@ def main() -> None:
             name=name,
             framework=framework,
             database=database,
+            memory_store=memory_store,
             plugins=[],  # Will be populated next
             docker=False,  # Placeholder
             docker_infra=False,  # Placeholder
@@ -279,6 +309,7 @@ def main() -> None:
                 f"[bold]Project:[/bold] {config.name}\n"
                 f"[bold]Framework:[/bold] {config.framework.value}\n"
                 f"[bold]Database:[/bold] {config.database.value}\n"
+                f"[bold]Memory Store:[/bold] {config.memory_store.value}\n"
                 f"[bold]Plugins:[/bold] {', '.join(config.plugins) or 'None'}\n"
                 f"[bold]Docker:[/bold] {'Yes' if config.docker else 'No'}\n"
                 f"[bold]Docker Infra:[/bold] {'Yes' if config.docker_infra else 'No'}",

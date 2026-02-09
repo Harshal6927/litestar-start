@@ -10,7 +10,7 @@ def app_file(tmp_path):
     """Create a temporary app.py file with bootstrap configuration."""
     content = dedent("""
     from litestar import Litestar
-    from config import settings
+    from .config import settings
     from litestar_vite import ViteConfig, VitePlugin
 
     app = Litestar(
@@ -33,7 +33,7 @@ def test_update_app_config(app_file: Path) -> None:
     updated_content = app_file.read_text(encoding="utf-8")
 
     # Check imports
-    assert "from config import settings, vite_config" in updated_content
+    assert "from .config import settings, vite_config" in updated_content
     assert "from litestar_vite import VitePlugin" in updated_content
     assert "from litestar_vite import ViteConfig, VitePlugin" not in updated_content
 
@@ -53,7 +53,7 @@ def test_update_app_config_idempotent(app_file: Path) -> None:
     second_run_content = app_file.read_text(encoding="utf-8")
 
     assert first_run_content == second_run_content
-    assert "from config import settings, vite_config" in second_run_content
+    assert "from .config import settings, vite_config" in second_run_content
 
 
 def test_post_generate(tmp_path: Path, mocker) -> None:
@@ -73,7 +73,7 @@ def test_post_generate(tmp_path: Path, mocker) -> None:
 
     content = dedent("""
     from litestar import Litestar
-    from config import settings
+    from .config import settings
     from litestar_vite import ViteConfig, VitePlugin
 
     app = Litestar(

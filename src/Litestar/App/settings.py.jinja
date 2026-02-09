@@ -47,6 +47,13 @@ class Settings:
 {% endif %}
 {% endif %}
 
+{% if has_store %}
+    # Memory Store
+    REDIS_URL: str = field(
+        default_factory=lambda: os.getenv("REDIS_URL", "{{ store_config.default_url }}")
+    )
+{% endif %}
+
     @classmethod
     def from_env(cls, dotenv_filename: str) -> "Settings":
         env_file = (
