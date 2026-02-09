@@ -43,3 +43,28 @@ volumes:
 volumes:
   {{ project_slug }}_mysql_dev_db: {}
   {% endif %}
+  {% if memory_store.value == "Redis" %}
+  redis:
+    image: {{ store_config.docker_image }}
+    container_name: {{ project_slug }}_redis_dev
+    ports:
+      - "{{ store_config.port }}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+  {% elif memory_store.value == "Valkey" %}
+  valkey:
+    image: {{ store_config.docker_image }}
+    container_name: {{ project_slug }}_valkey_dev
+    ports:
+      - "{{ store_config.port }}:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+  {% endif %}

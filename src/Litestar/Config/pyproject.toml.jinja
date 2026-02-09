@@ -20,6 +20,9 @@ dependencies = [
 {% if litestar_vite %}
     "litestar-vite>=0.18.1",
 {% endif %}
+{% if has_store %}
+    "redis>=5.2.1",
+{% endif %}
 ]
 
 [tool.ruff]

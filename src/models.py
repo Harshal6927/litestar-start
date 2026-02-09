@@ -22,12 +22,21 @@ class Database(StrEnum):
     NONE = "None"
 
 
+class MemoryStore(StrEnum):
+    """Supported memory store options."""
+
+    REDIS = "Redis"
+    VALKEY = "Valkey"
+    NONE = "None"
+
+
 class ProjectConfig(msgspec.Struct):
     """Configuration for a new project."""
 
     name: str
     framework: Framework
     database: Database
+    memory_store: MemoryStore
     plugins: list[str]
     docker: bool
     docker_infra: bool
@@ -52,7 +61,9 @@ class ProjectConfig(msgspec.Struct):
     @property
     def needs_docker_infra(self) -> bool:
         """Check if docker-compose.infra.yml should be generated."""
-        return self.docker_infra and self.database in {Database.POSTGRESQL, Database.MYSQL}
+        has_db = self.database in {Database.POSTGRESQL, Database.MYSQL}
+        has_store = self.memory_store in {MemoryStore.REDIS, MemoryStore.VALKEY}
+        return self.docker_infra and (has_db or has_store)
 
 
 class DatabaseConfig(msgspec.Struct):
@@ -95,3 +106,39 @@ class DatabaseConfig(msgspec.Struct):
             ),
         }
         return configs.get(db)
+
+
+class MemoryStoreConfig(msgspec.Struct):
+    """Memory store specific configuration."""
+
+    driver: str
+    port: int
+    default_url: str
+    docker_image: str | None = None
+
+    @classmethod
+    def for_store(cls, store: MemoryStore) -> MemoryStoreConfig | None:
+        """Get configuration for a specific memory store.
+
+        Args:
+            store: The memory store type.
+
+        Returns:
+            The configuration for the specified memory store, or None if not found.
+
+        """
+        configs = {
+            MemoryStore.REDIS: cls(
+                driver="redis",
+                port=6379,
+                default_url="redis://localhost:6379/0",
+                docker_image="redis:8.4.0-bookworm",
+            ),
+            MemoryStore.VALKEY: cls(
+                driver="redis",
+                port=6379,
+                default_url="redis://localhost:6379/0",
+                docker_image="valkey/valkey:7.2.11-alpine3.23",
+            ),
+        }
+        return configs.get(store)

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from jinja2 import Environment
 
-from src.models import DatabaseConfig, ProjectConfig
+from src.models import DatabaseConfig, MemoryStoreConfig, ProjectConfig
 from src.plugin import discover_plugins
 from src.utils import get_package_dir, get_template_env, write_file
 
@@ -33,6 +33,7 @@ class LitestarGenerator:
 
         """
         db_config = DatabaseConfig.for_database(self.config.database)
+        store_config = MemoryStoreConfig.for_store(self.config.memory_store)
 
         context = {
             "project": self.config,
@@ -41,6 +42,9 @@ class LitestarGenerator:
             "database": self.config.database,
             "db_config": db_config,
             "has_database": self.config.database.value != "None",
+            "memory_store": self.config.memory_store,
+            "store_config": store_config,
+            "has_store": self.config.memory_store.value != "None",
             "docker": self.config.docker,
             "docker_infra": self.config.docker_infra,
         }

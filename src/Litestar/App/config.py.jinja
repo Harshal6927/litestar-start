@@ -9,6 +9,9 @@ from advanced_alchemy.extensions.litestar import (
 from pathlib import Path
 from litestar_vite import ViteConfig, PathConfig
 {% endif %}
+{% if has_store %}
+from litestar.stores.redis import RedisStore
+{% endif %}
 
 from .settings import get_settings
 
@@ -35,5 +38,13 @@ vite_config = ViteConfig(
         resource_dir="src",
         bundle_dir="public",
     ),
+)
+{% endif %}
+
+{% if has_store %}
+redis_store = RedisStore.with_client(
+    url=settings.REDIS_URL,
+    port=6379,
+    db=0,
 )
 {% endif %}
