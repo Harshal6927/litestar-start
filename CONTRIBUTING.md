@@ -29,7 +29,6 @@ src/
     │   └── docker-compose.infra.yml.jinja
     ├── app/             # Core application templates
     │   ├── __init__.py.jinja
-    │   ├── __main__.py.jinja
     │   ├── config.py.jinja
     │   └── main.py.jinja
     └── Plugins/         # Optional plugin templates
@@ -193,7 +192,6 @@ A typical generated project looks like:
 my_project/
 ├── app/
 │   ├── __init__.py
-│   ├── __main__.py
 │   ├── config.py
 │   └── main.py
 ├── models/                # If AdvancedAlchemy selected

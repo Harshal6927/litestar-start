@@ -221,19 +221,11 @@ def test_litestar_generator_granian_rendering(tmp_path: Path) -> None:
     # Verify base files
     assert (tmp_path / "pyproject.toml").exists()
     assert (tmp_path / "src" / "backend" / "app.py").exists()
-    assert (tmp_path / "src" / "backend" / "__main__.py").exists()
 
     # Verify Granian plugin in app.py
     app_content = (tmp_path / "src" / "backend" / "app.py").read_text()
     assert "from litestar_granian import GranianPlugin" in app_content
     assert "GranianPlugin()," in app_content
-
-    # Verify Granian in __main__.py (not uvicorn)
-    main_content = (tmp_path / "src" / "backend" / "__main__.py").read_text()
-    assert "from granian import Granian" in main_content
-    assert "from granian.constants import Interfaces" in main_content
-    assert "Granian(" in main_content
-    assert "uvicorn" not in main_content
 
     # Verify Granian dependency in pyproject.toml
     pyproject_content = (tmp_path / "pyproject.toml").read_text()
