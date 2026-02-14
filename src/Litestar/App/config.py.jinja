@@ -13,10 +13,10 @@ from litestar_vite import ViteConfig, PathConfig
 from litestar.stores.redis import RedisStore
 {% endif %}
 {% if litestar_saq %}
-from litestar_saq import QueueConfig, SAQConfig, SAQPlugin
+from litestar_saq import CronJob, QueueConfig, SAQConfig, SAQPlugin
 {% endif %}
 
-from .settings import get_settings
+from src.backend.settings import get_settings
 
 settings = get_settings()
 
@@ -57,7 +57,18 @@ saq = SAQPlugin(
     config=SAQConfig(
         use_server_lifespan=True,
         queue_configs=[
-            QueueConfig(name="default", dsn=settings.REDIS_URL),
+            QueueConfig(
+                name="default",
+                dsn=settings.REDIS_URL,
+                scheduled_tasks=[
+                    CronJob(
+                        function="src.backend.lib.tasks.sample_task",
+                        cron="* * * * *",
+                        timeout=60,
+                        ttl=2000,
+                    ),
+                ],
+            ),
         ],
     )
 )

@@ -7,12 +7,12 @@ lint:
 	pre-commit run -a
 	@echo "Linters completed. ✅"
 
-{% if database.value == "PostgreSQL" or database.value == "MySQL" %}
+{% if database.value == "PostgreSQL" or database.value == "MySQL" or has_store %}
 INFRA_COMPOSE_FILE := docker-compose.infra.yml
 
 .PHONY: start-infra
 start-infra:
-	@echo "Starting infrastructure (AlloyDB Omni)... 🔄"
+	@echo "Starting infrastructure... 🔄"
 	docker compose -f $(INFRA_COMPOSE_FILE) up -d
 	@echo "Infrastructure started. ✅"
 

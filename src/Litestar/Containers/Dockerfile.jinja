@@ -35,7 +35,7 @@ RUN uv sync --no-dev --frozen --no-install-project
 FROM base AS runtime
 
 ENV PATH="/workspace/app/.venv/bin:$PATH" \
-    PYTHONPATH="/workspace/app/src/backend:$PYTHONPATH" \
+    PYTHONPATH="/workspace/app:$PYTHONPATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONFAULTHANDLER=1 \

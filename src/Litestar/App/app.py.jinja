@@ -4,21 +4,22 @@ from litestar import Litestar, get
 from litestar.logging import LoggingConfig
 from litestar.openapi import OpenAPIConfig
 from litestar.openapi.plugins import ScalarRenderPlugin
-from .config import settings
+from src.backend.config import settings
 {% if advanced_alchemy %}
 from advanced_alchemy.exceptions import RepositoryError
-from .config import alchemy
-from .lib import exception_handler
-from .controllers import UserController
+from src.backend.config import alchemy
+from src.backend.lib import exception_handler
+from src.backend.controllers import UserController
 {% endif %}
 {% if litestar_vite %}
 from litestar_vite import ViteConfig, VitePlugin
+from src.backend.config import vite_config
 {% endif %}
 {% if has_store %}
-from .config import redis_store
+from src.backend.config import redis_store
 {% endif %}
 {% if litestar_saq %}
-from .config import saq
+from src.backend.config import saq
 {% endif %}
 {% if litestar_granian %}
 from litestar_granian import GranianPlugin

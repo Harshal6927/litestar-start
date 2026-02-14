@@ -248,6 +248,10 @@ def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> 
     # Run plugin post-generation hooks
     generator.post_generate()
 
+    # Sort imports
+    with console.status("[bold green]Sorting imports with isort..."):
+        subprocess.run(["ruff", "check", "--select", "I", "--fix", "."], cwd=output_dir, check=True)  # noqa: S607
+
     # Ask if user wants to start the application
     console.print()
     start_app = questionary.confirm(
