@@ -17,6 +17,9 @@ from litestar_vite import ViteConfig, VitePlugin
 {% if has_store %}
 from .config import redis_store
 {% endif %}
+{% if litestar_saq %}
+from .config import saq
+{% endif %}
 
 @get("/health")
 async def health() -> dict[str, str]:
@@ -52,11 +55,15 @@ app = Litestar(
         RepositoryError: exception_handler,
     },
 {% endif %}
-{% if advanced_alchemy and litestar_vite %}
-    plugins=[alchemy, VitePlugin(config=ViteConfig(dev_mode=settings.DEBUG))],
-{% elif advanced_alchemy %}
-    plugins=[alchemy],
-{% elif litestar_vite %}
-    plugins=[VitePlugin(config=ViteConfig(dev_mode=settings.DEBUG))],
+    plugins=[
+{% if advanced_alchemy %}
+        alchemy,
 {% endif %}
+{% if litestar_vite %}
+        VitePlugin(config=ViteConfig(dev_mode=settings.DEBUG)),
+{% endif %}
+{% if litestar_saq %}
+        saq,
+{% endif %}
+    ],
 )

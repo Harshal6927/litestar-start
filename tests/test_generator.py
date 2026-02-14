@@ -124,3 +124,62 @@ def test_litestar_generator_docker_compose_rendering(tmp_path: Path) -> None:
     # Check services
     assert "image: postgres:17.7-alpine3.23" in content
     assert "image: redis:8.4.0-bookworm" in content
+
+
+def test_litestar_generator_saq_context(tmp_path: Path) -> None:
+    """Verify Litestar generator template context values with SAQ plugin enabled."""
+    config = ProjectConfig(
+        name="SAQ Test",
+        framework=Framework.LITESTAR,
+        database=Database.NONE,
+        memory_store=MemoryStore.REDIS,
+        plugins=["litestar_saq"],
+        docker=False,
+        docker_infra=False,
+    )
+
+    generator = LitestarGenerator(config, tmp_path)
+    context = generator._get_template_context()
+
+    assert context["litestar_saq"] is True
+    assert context["has_store"] is True
+    assert context["memory_store"] == MemoryStore.REDIS
+
+
+def test_litestar_generator_saq_rendering(tmp_path: Path) -> None:
+    """Verify that SAQ plugin templates are correctly rendered into the output directory."""
+    config = ProjectConfig(
+        name="SAQ Plugin Test",
+        framework=Framework.LITESTAR,
+        database=Database.NONE,
+        memory_store=MemoryStore.REDIS,
+        plugins=["litestar_saq"],
+        docker=False,
+        docker_infra=False,
+    )
+
+    generator = LitestarGenerator(config, tmp_path)
+    generator.generate()
+
+    # Verify base files
+    assert (tmp_path / "pyproject.toml").exists()
+    assert (tmp_path / "src" / "backend" / "app.py").exists()
+    assert (tmp_path / "src" / "backend" / "config.py").exists()
+
+    # Verify SAQ plugin files
+    assert (tmp_path / "src" / "backend" / "lib" / "tasks.py").exists()
+
+    # Verify SAQ config in config.py
+    config_content = (tmp_path / "src" / "backend" / "config.py").read_text()
+    assert "from litestar_saq import QueueConfig, SAQConfig, SAQPlugin" in config_content
+    assert "saq = SAQPlugin(" in config_content
+    assert 'QueueConfig(name="default"' in config_content
+
+    # Verify SAQ plugin in app.py
+    app_content = (tmp_path / "src" / "backend" / "app.py").read_text()
+    assert "from .config import saq" in app_content
+    assert "saq," in app_content
+
+    # Verify SAQ dependency in pyproject.toml
+    pyproject_content = (tmp_path / "pyproject.toml").read_text()
+    assert "litestar-saq>=0.7.0" in pyproject_content

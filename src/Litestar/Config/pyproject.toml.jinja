@@ -23,6 +23,9 @@ dependencies = [
 {% if has_store %}
     "redis>=5.2.1",
 {% endif %}
+{% if litestar_saq %}
+    "litestar-saq>=0.7.0",
+{% endif %}
 ]
 
 [tool.ruff]
