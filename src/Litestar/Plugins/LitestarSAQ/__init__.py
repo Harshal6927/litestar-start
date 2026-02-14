@@ -1,3 +1,4 @@
+from src.models import MemoryStore, ProjectConfig
 from src.plugin import BasePlugin
 
 
@@ -11,3 +12,6 @@ class LitestarSAQPlugin(BasePlugin):
     @property
     def description(self) -> str:  # noqa: D102
         return "SAQ integration for background tasks in Litestar"
+
+    def is_applicable(self, config: ProjectConfig) -> bool:  # noqa: D102, PLR6301
+        return config.memory_store != MemoryStore.NONE

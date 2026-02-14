@@ -12,6 +12,9 @@ from litestar_vite import ViteConfig, PathConfig
 {% if has_store %}
 from litestar.stores.redis import RedisStore
 {% endif %}
+{% if litestar_saq %}
+from litestar_saq import QueueConfig, SAQConfig, SAQPlugin
+{% endif %}
 
 from .settings import get_settings
 
@@ -46,5 +49,16 @@ redis_store = RedisStore.with_client(
     url=settings.REDIS_URL,
     port=6379,
     db=0,
+)
+{% endif %}
+
+{% if litestar_saq %}
+saq = SAQPlugin(
+    config=SAQConfig(
+        use_server_lifespan=True,
+        queue_configs=[
+            QueueConfig(name="default", dsn=settings.REDIS_URL),
+        ],
+    )
 )
 {% endif %}
