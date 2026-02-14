@@ -2,7 +2,7 @@ from pathlib import Path
 
 from src.plugin import Plugin, discover_plugins
 
-MIN_PLUGIN_COUNT = 3
+MIN_PLUGIN_COUNT = 4
 
 
 def test_discover_litestar_plugins() -> None:
@@ -14,6 +14,7 @@ def test_discover_litestar_plugins() -> None:
     assert "advanced_alchemy" in ids
     assert "litestar_saq" in ids
     assert "litestar_vite" in ids
+    assert "litestar_granian" in ids
 
     for plugin in plugins:
         assert isinstance(plugin, Plugin)

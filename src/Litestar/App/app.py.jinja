@@ -20,6 +20,9 @@ from .config import redis_store
 {% if litestar_saq %}
 from .config import saq
 {% endif %}
+{% if litestar_granian %}
+from litestar_granian import GranianPlugin
+{% endif %}
 
 @get("/health")
 async def health() -> dict[str, str]:
@@ -64,6 +67,9 @@ app = Litestar(
 {% endif %}
 {% if litestar_saq %}
         saq,
+{% endif %}
+{% if litestar_granian %}
+        GranianPlugin(),
 {% endif %}
     ],
 )
