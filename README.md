@@ -1,6 +1,6 @@
 # Litestar Start
 
-Interactive CLI to scaffold production-ready Python backend projects.
+Interactive CLI to scaffold fullstack projects with modular choices
 
 ## Installation
 
