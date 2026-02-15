@@ -1,4 +1,4 @@
-.PHONY: lint release
+.PHONY: lint release test
 
 lint:
 	@echo "Running linters... 🔄"
@@ -7,6 +7,11 @@ lint:
 	pre-commit install
 	pre-commit run -a
 	@echo "Linters completed. ✅"
+
+test:
+	@echo "Running tests... 🔄"
+	pytest tests
+	@echo "Tests completed. ✅"
 
 release:
 	@echo "Preparing release... 🔄"
