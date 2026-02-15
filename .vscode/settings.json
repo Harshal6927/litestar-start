@@ -42,7 +42,7 @@
   "evenBetterToml.formatter.arrayAutoCollapse": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.ruff": "explicit",
-    "source.organizeImports.ruff": "explicit",
+    "source.organizeImports.ruff": "explicit"
   },
   "terminal.integrated.allowChords": false,
   "[python]": {
@@ -57,7 +57,10 @@
       "source.organizeImports": "explicit"
     }
   },
-  "python.analysis.fixAll": ["source.unusedImports", "source.convertImportFormat"],
+  "python.analysis.fixAll": [
+    "source.unusedImports",
+    "source.convertImportFormat"
+  ],
   "python.testing.unittestEnabled": false,
   "python.analysis.supportDocstringTemplate": true,
   "python.analysis.supportRestructuredText": true,
@@ -74,14 +77,20 @@
   "ruff.lint.preview": true,
   "ruff.format.preview": true,
   "ruff.lineLength": 120,
-  "ruff.lint.extendSelect": ["ALL"],
-  "ruff.lint.select": ["ALL"],
+  "ruff.lint.extendSelect": [
+    "ALL"
+  ],
+  "ruff.lint.select": [
+    "ALL"
+  ],
   "ruff.configurationPreference": "filesystemFirst",
   "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest",
   "python.testing.pytestEnabled": true,
-  "python.testing.cwd": "${workspaceFolder}/src/py/tests",
+  "python.testing.cwd": "${workspaceFolder}",
   "python.testing.autoTestDiscoverOnSaveEnabled": true,
   "python.analysis.autoSearchPaths": true,
-  "python.analysis.extraPaths": ["${workspaceFolder}/src/py"],
-  "makefile.configureOnOpen": false,
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/src"
+  ],
+  "makefile.configureOnOpen": false
 }

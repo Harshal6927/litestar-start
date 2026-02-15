@@ -2,13 +2,19 @@ from pathlib import Path
 from textwrap import dedent
 
 import pytest
+from pytest_mock import MockerFixture
 
 from src.Litestar.Plugins.LitestarVite import LitestarVitePlugin
 
 
 @pytest.fixture
-def app_file(tmp_path):
-    """Create a temporary app.py file with bootstrap configuration."""
+def app_file(tmp_path: Path) -> Path:
+    """Create a temporary app.py file with bootstrap configuration.
+
+    Returns:
+        Path to the generated app.py file.
+
+    """
     content = dedent("""
     from litestar import Litestar
     from .config import settings
@@ -57,7 +63,7 @@ def test_update_app_config_idempotent(app_file: Path) -> None:
     assert "from .config import settings, vite_config" in second_run_content
 
 
-def test_post_generate(tmp_path: Path, mocker) -> None:
+def test_post_generate(tmp_path: Path, mocker: MockerFixture) -> None:
     """Test post_generate calls subprocess and updates app config in correct location."""
     plugin = LitestarVitePlugin()
 

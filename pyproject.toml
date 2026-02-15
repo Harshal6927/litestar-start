@@ -37,7 +37,10 @@ packages = ["src"]
 include = ["src"]
 
 [tool.ruff]
+fix = true
+format.preview = true
 line-length = 120
+lint.fixable = ["ALL"]
 lint.ignore = [
     "CPY001",  # Missing copyright notice
     "D100",    # Undocumented public module
@@ -47,7 +50,13 @@ lint.ignore = [
     "S101",    # Use of assert detected
     "SLF001",  # Private member accessed
     "RUF067",  # `__init__` module should only contain docstrings
+    "S404",    # Suspicious subprocess import
 ]
+lint.preview = true
+lint.pydocstyle.convention = "google"
+lint.select = ["ALL"]
+target-version = "py313"
+
 
 [dependency-groups]
 dev = ["pre-commit>=4.5.1", "pytest>=9.0.2", "pytest-mock>=3.15.1", "ruff>=0.14.11", "ty>=0.0.11"]

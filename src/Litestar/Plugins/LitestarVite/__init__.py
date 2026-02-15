@@ -1,4 +1,4 @@
-import subprocess  # noqa: S404
+import subprocess
 from pathlib import Path
 
 from src.models import ProjectConfig
@@ -25,7 +25,8 @@ class LitestarVitePlugin(BasePlugin):
         )
         self._update_app_config(output_dir / "src" / "backend" / "app.py")
 
-    def _update_app_config(self, app_path: Path) -> None:
+    @staticmethod
+    def _update_app_config(app_path: Path) -> None:
         """Update app.py to use the full Vite config from config.py."""
         if not app_path.exists():
             return
