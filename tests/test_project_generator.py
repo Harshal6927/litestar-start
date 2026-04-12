@@ -3,6 +3,7 @@
 
 from pathlib import Path
 
+import pytest
 from pytest_mock import MockerFixture
 
 from src.generator import ProjectGenerator
@@ -91,3 +92,30 @@ class TestProjectGenerator:
 
         # Should not raise
         generator.post_generate()
+
+    def test_generate_unsupported_framework_raises(self, tmp_path: Path) -> None:
+        """Verify generate raises NotImplementedError for unsupported framework."""
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=False,
+        )
+
+        generator = ProjectGenerator(config, tmp_path)
+        # Monkeypatch the framework to a value that's not handled
+        generator.config = ProjectConfig(
+            name="Test",
+            framework="UnsupportedFramework",  # type: ignore[arg-type]
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=False,
+        )
+
+        with pytest.raises(NotImplementedError, match="not yet supported"):
+            generator.generate()
