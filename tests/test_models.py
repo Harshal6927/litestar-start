@@ -195,6 +195,45 @@ class TestProjectConfig:
         )
         assert config.needs_docker_infra is True
 
+    def test_slug_removes_special_characters(self) -> None:
+        """Verify slug removes special characters like @, #, $."""
+        config = ProjectConfig(
+            name="my@project#name",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=False,
+        )
+        assert config.slug == "myprojectname"
+
+    def test_slug_handles_digit_prefix(self) -> None:
+        """Verify slug adds underscore prefix for digit-starting names."""
+        config = ProjectConfig(
+            name="123app",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=False,
+        )
+        assert config.slug == "_123app"
+
+    def test_slug_handles_consecutive_separators(self) -> None:
+        """Verify slug collapses consecutive hyphens/spaces to single underscore."""
+        config = ProjectConfig(
+            name="my--project  name",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=False,
+        )
+        assert config.slug == "my_project_name"
+
 
 class TestDatabaseConfig:
     """Tests for DatabaseConfig model."""
