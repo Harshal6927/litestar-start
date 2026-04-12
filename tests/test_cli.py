@@ -13,6 +13,7 @@ from src.cli import (
     ask_memory_store,
     ask_plugins,
     ask_project_name,
+    main,
     run_post_generation_setup,
 )
 from src.generator import ProjectGenerator
@@ -689,3 +690,62 @@ class TestSubprocessFailures:
 
         with pytest.raises(sp.CalledProcessError):
             run_post_generation_setup(generator, tmp_path)
+
+
+class TestMain:
+    """Tests for main() CLI entry point."""
+
+    def test_main_happy_path(self, tmp_path: Path, mocker: MockerFixture) -> None:
+        """Verify main() orchestrates the full project generation flow."""
+        mocker.patch("src.cli.print_banner")
+        mocker.patch("src.cli.ask_project_name", return_value="test-project")
+        mocker.patch("src.cli.ask_framework", return_value=Framework.LITESTAR)
+        mocker.patch("src.cli.ask_database", return_value=Database.NONE)
+        mocker.patch("src.cli.ask_memory_store", return_value=MemoryStore.NONE)
+        mocker.patch("src.cli.discover_plugins", return_value=[])
+        mocker.patch("src.cli.ask_plugins", return_value=[])
+        mocker.patch("src.cli.ask_docker", return_value=(False, False))
+
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = True  # Confirm generation
+
+        mock_generator_cls = mocker.patch("src.cli.ProjectGenerator")
+        mock_generator = mock_generator_cls.return_value
+
+        # Mock Path.cwd() to use tmp_path
+        mocker.patch("src.cli.Path.cwd", return_value=tmp_path)
+
+        mock_post_gen = mocker.patch("src.cli.run_post_generation_setup")
+
+        main()
+
+        mock_generator_cls.assert_called_once()
+        mock_generator.generate.assert_called_once()
+        mock_post_gen.assert_called_once()
+
+    def test_main_user_cancels_confirmation(self, mocker: MockerFixture) -> None:
+        """Verify main() exits when user declines confirmation."""
+        mocker.patch("src.cli.print_banner")
+        mocker.patch("src.cli.ask_project_name", return_value="test-project")
+        mocker.patch("src.cli.ask_framework", return_value=Framework.LITESTAR)
+        mocker.patch("src.cli.ask_database", return_value=Database.NONE)
+        mocker.patch("src.cli.ask_memory_store", return_value=MemoryStore.NONE)
+        mocker.patch("src.cli.discover_plugins", return_value=[])
+        mocker.patch("src.cli.ask_plugins", return_value=[])
+        mocker.patch("src.cli.ask_docker", return_value=(False, False))
+
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = False  # Decline
+
+        with pytest.raises(SystemExit) as exc_info:
+            main()
+
+        assert exc_info.value.code == 0
+
+    def test_main_keyboard_interrupt(self, mocker: MockerFixture) -> None:
+        """Verify main() handles KeyboardInterrupt gracefully."""
+        mocker.patch("src.cli.print_banner")
+        mocker.patch("src.cli.ask_project_name", side_effect=KeyboardInterrupt)
+
+        # Should not raise — main() catches KeyboardInterrupt
+        main()
