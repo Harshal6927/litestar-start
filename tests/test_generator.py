@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from pytest_mock import MockerFixture
+
 from src.Litestar.generator import LitestarGenerator
 from src.models import Database, Framework, MemoryStore, ProjectConfig
 
@@ -449,3 +451,48 @@ def test_litestar_generator_vite_context(tmp_path: Path) -> None:
     context = generator._get_template_context()
 
     assert context["litestar_vite"] is True
+
+
+def test_litestar_generator_post_generate_no_plugins(tmp_path: Path) -> None:
+    """Verify post_generate does nothing when no plugins are enabled."""
+    config = ProjectConfig(
+        name="Post Gen Test",
+        framework=Framework.LITESTAR,
+        database=Database.NONE,
+        memory_store=MemoryStore.NONE,
+        plugins=[],
+        docker=False,
+        docker_infra=False,
+    )
+
+    generator = LitestarGenerator(config, tmp_path)
+    # Should not raise
+    generator.post_generate()
+
+
+def test_litestar_generator_post_generate_calls_plugin(tmp_path: Path, mocker: MockerFixture) -> None:
+    """Verify post_generate calls post_generate on each enabled plugin."""
+    config = ProjectConfig(
+        name="Post Gen Test",
+        framework=Framework.LITESTAR,
+        database=Database.POSTGRESQL,
+        memory_store=MemoryStore.NONE,
+        plugins=["advanced_alchemy"],
+        docker=False,
+        docker_infra=False,
+    )
+
+    generator = LitestarGenerator(config, tmp_path)
+
+    # Mock all discovered plugins' post_generate
+    for plugin in generator.plugins:
+        mocker.patch.object(plugin, "post_generate")
+
+    generator.post_generate()
+
+    # Verify the enabled plugin's post_generate was called
+    for plugin in generator.plugins:
+        if config.has_plugin(plugin.id):
+            plugin.post_generate.assert_called_once_with(config, tmp_path)
+        else:
+            plugin.post_generate.assert_not_called()
