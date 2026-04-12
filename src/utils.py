@@ -5,7 +5,6 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-MIN_PROJECT_NAME_LENGTH = 1
 MAX_PROJECT_NAME_LENGTH = 50
 
 
@@ -72,8 +71,6 @@ def validate_project_name(name: str) -> str | None:
     """
     if not name:
         return "Project name cannot be empty"
-    if len(name) < MIN_PROJECT_NAME_LENGTH:
-        return f"Project name must be at least {MIN_PROJECT_NAME_LENGTH} characters"
     if len(name) > MAX_PROJECT_NAME_LENGTH:
         return f"Project name must be less than {MAX_PROJECT_NAME_LENGTH} characters"
     # Check if slugified name is valid
