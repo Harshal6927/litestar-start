@@ -532,3 +532,104 @@ class TestRunPostGenerationSetup:
         assert "check" in ruff_calls[0][0][0]
         assert "--select" in ruff_calls[0][0][0]
         assert "I" in ruff_calls[0][0][0]
+
+    def test_copies_env_example_to_env(self, tmp_path: Path, mocker: MockerFixture) -> None:
+        """Verify run_post_generation_setup copies .env.example to .env."""
+        mocker.patch("subprocess.run")
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = False
+
+        # Create .env.example
+        env_example = tmp_path / ".env.example"
+        env_example.write_text("DATABASE_URL=sqlite:///app.db\n")
+
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=False,
+        )
+        generator = ProjectGenerator(config, tmp_path)
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
+
+        run_post_generation_setup(generator, tmp_path)
+
+        env_file = tmp_path / ".env"
+        assert env_file.exists()
+        assert env_file.read_text() == "DATABASE_URL=sqlite:///app.db\n"
+
+    def test_skips_env_copy_when_no_example(self, tmp_path: Path, mocker: MockerFixture) -> None:
+        """Verify run_post_generation_setup skips .env copy when .env.example doesn't exist."""
+        mocker.patch("subprocess.run")
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = False
+
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=False,
+        )
+        generator = ProjectGenerator(config, tmp_path)
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
+
+        run_post_generation_setup(generator, tmp_path)
+
+        env_file = tmp_path / ".env"
+        assert not env_file.exists()
+
+    def test_skips_dockerignore_when_no_docker(self, tmp_path: Path, mocker: MockerFixture) -> None:
+        """Verify .dockerignore is NOT created when docker is False."""
+        mocker.patch("subprocess.run")
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = False
+
+        # Create .gitignore but docker=False
+        gitignore = tmp_path / ".gitignore"
+        gitignore.write_text("*.pyc\n")
+
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=False,
+        )
+        generator = ProjectGenerator(config, tmp_path)
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
+
+        run_post_generation_setup(generator, tmp_path)
+
+        dockerignore = tmp_path / ".dockerignore"
+        assert not dockerignore.exists()
+
+    def test_skips_dockerignore_when_no_gitignore(self, tmp_path: Path, mocker: MockerFixture) -> None:
+        """Verify .dockerignore is NOT created when .gitignore doesn't exist."""
+        mocker.patch("subprocess.run")
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = False
+
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=True,
+            docker_infra=False,
+        )
+        generator = ProjectGenerator(config, tmp_path)
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
+
+        run_post_generation_setup(generator, tmp_path)
+
+        dockerignore = tmp_path / ".dockerignore"
+        assert not dockerignore.exists()
