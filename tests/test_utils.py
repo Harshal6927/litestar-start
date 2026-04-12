@@ -120,6 +120,34 @@ class TestSlugify:
         assert slugify("My-Cool Project") == "my_cool_project"
         assert slugify("The-Great App Name") == "the_great_app_name"
 
+    def test_unicode_characters(self) -> None:
+        """Verify slugify strips unicode characters."""
+        assert slugify("café") == "caf"
+        assert slugify("naïve") == "nave"
+
+    def test_consecutive_hyphens(self) -> None:
+        """Verify slugify collapses consecutive hyphens to single underscore."""
+        assert slugify("my--project") == "my_project"
+        assert slugify("a---b") == "a_b"
+
+    def test_consecutive_spaces(self) -> None:
+        """Verify slugify collapses consecutive spaces to single underscore."""
+        assert slugify("my   project") == "my_project"
+
+    def test_mixed_consecutive_separators(self) -> None:
+        """Verify slugify collapses mixed hyphens/spaces to single underscore."""
+        assert slugify("my - project") == "my_project"
+        assert slugify("a - - b") == "a_b"
+
+    def test_leading_trailing_separators(self) -> None:
+        """Verify slugify handles leading/trailing hyphens and spaces."""
+        assert slugify("-project-") == "_project_"
+        assert slugify(" project ") == "_project_"
+
+    def test_underscores_preserved(self) -> None:
+        """Verify slugify preserves existing underscores."""
+        assert slugify("my_project") == "my_project"
+
 
 class TestValidateProjectName:
     """Tests for validate_project_name function."""
@@ -155,6 +183,18 @@ class TestValidateProjectName:
         """Verify validate_project_name accepts single letter."""
         assert validate_project_name("a") is None
         assert validate_project_name("Z") is None
+
+    def test_max_length_boundary(self) -> None:
+        """Verify validate_project_name at exact 50-char boundary."""
+        assert validate_project_name("x" * 49) is None
+        assert validate_project_name("x" * 50) is None
+        error = validate_project_name("x" * 51)
+        assert error is not None
+        assert "50" in error
+
+    def test_numeric_only_name(self) -> None:
+        """Verify validate_project_name accepts numeric-only names (slugified to _123)."""
+        assert validate_project_name("123") is None
 
 
 class TestWriteFile:
