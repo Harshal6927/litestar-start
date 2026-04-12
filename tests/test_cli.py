@@ -633,3 +633,59 @@ class TestRunPostGenerationSetup:
 
         dockerignore = tmp_path / ".dockerignore"
         assert not dockerignore.exists()
+
+
+class TestSubprocessFailures:
+    """Tests for subprocess failure paths in run_post_generation_setup."""
+
+    def test_git_init_failure_raises(self, tmp_path: Path, mocker: MockerFixture) -> None:
+        """Verify CalledProcessError from git init propagates."""
+        import subprocess as sp
+
+        mock_run = mocker.patch("subprocess.run")
+        mock_run.side_effect = sp.CalledProcessError(128, ["git", "init"])
+
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=False,
+        )
+        generator = ProjectGenerator(config, tmp_path)
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
+
+        with pytest.raises(sp.CalledProcessError):
+            run_post_generation_setup(generator, tmp_path)
+
+    def test_uv_sync_failure_raises(self, tmp_path: Path, mocker: MockerFixture) -> None:
+        """Verify CalledProcessError from uv sync propagates."""
+        import subprocess as sp
+
+        call_count = 0
+        uv_sync_call_number = 2
+
+        def selective_fail(*args: object, **kwargs: object) -> None:  # noqa: ARG001
+            nonlocal call_count
+            call_count += 1
+            if call_count == uv_sync_call_number:  # uv sync is the second subprocess call
+                raise sp.CalledProcessError(1, ["uv", "sync"])
+
+        mocker.patch("subprocess.run", side_effect=selective_fail)
+
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=False,
+        )
+        generator = ProjectGenerator(config, tmp_path)
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
+
+        with pytest.raises(sp.CalledProcessError):
+            run_post_generation_setup(generator, tmp_path)
