@@ -5,6 +5,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from src.Litestar.Plugins.LitestarVite import LitestarVitePlugin
+from src.models import ProjectConfig
 
 
 @pytest.fixture
@@ -71,7 +72,7 @@ def test_post_generate(tmp_path: Path, mocker: MockerFixture) -> None:
     mock_run = mocker.patch("subprocess.run")
 
     # Mock ProjectConfig
-    config = mocker.Mock()
+    config = mocker.Mock(spec=ProjectConfig)
 
     # Setup src/backend/app.py
     backend_dir = tmp_path / "src" / "backend"

@@ -16,6 +16,7 @@ from src.cli import (
     run_post_generation_setup,
 )
 from src.generator import ProjectGenerator
+from src.Litestar.generator import LitestarGenerator
 from src.models import Database, Framework, MemoryStore, ProjectConfig
 from src.plugin import BasePlugin
 
@@ -371,7 +372,7 @@ class TestRunPostGenerationSetup:
             docker_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
-        generator._framework_generator = mocker.Mock()
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
 
         run_post_generation_setup(generator, tmp_path)
 
@@ -396,7 +397,7 @@ class TestRunPostGenerationSetup:
             docker_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
-        generator._framework_generator = mocker.Mock()
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
 
         run_post_generation_setup(generator, tmp_path)
 
@@ -420,7 +421,7 @@ class TestRunPostGenerationSetup:
             docker_infra=True,
         )
         generator = ProjectGenerator(config, tmp_path)
-        generator._framework_generator = mocker.Mock()
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
 
         run_post_generation_setup(generator, tmp_path)
 
@@ -445,7 +446,7 @@ class TestRunPostGenerationSetup:
             docker_infra=True,
         )
         generator = ProjectGenerator(config, tmp_path)
-        generator._framework_generator = mocker.Mock()
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
 
         run_post_generation_setup(generator, tmp_path)
 
@@ -473,7 +474,7 @@ class TestRunPostGenerationSetup:
             docker_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
-        generator._framework_generator = mocker.Mock()
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
 
         run_post_generation_setup(generator, tmp_path)
 
@@ -521,7 +522,7 @@ class TestRunPostGenerationSetup:
             docker_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
-        generator._framework_generator = mocker.Mock()
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
 
         run_post_generation_setup(generator, tmp_path)
 
