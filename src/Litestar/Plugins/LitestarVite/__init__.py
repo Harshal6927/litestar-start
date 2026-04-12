@@ -9,11 +9,23 @@ class LitestarVitePlugin(BasePlugin):
     """Plugin providing Vite integration for Litestar frontend assets."""
 
     @property
-    def name(self) -> str:  # noqa: D102
+    def name(self) -> str:
+        """Get the plugin display name.
+
+        Returns:
+            The display name shown in the CLI.
+
+        """
         return "Litestar Vite (Frontend Integration)"
 
     @property
-    def description(self) -> str:  # noqa: D102
+    def description(self) -> str:
+        """Get the plugin description.
+
+        Returns:
+            A short description of the plugin.
+
+        """
         return "Vite integration for frontend assets in Litestar"
 
     def post_generate(self, config: ProjectConfig, output_dir: Path) -> None:  # noqa: ARG002

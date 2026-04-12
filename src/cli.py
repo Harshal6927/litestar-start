@@ -14,6 +14,17 @@ from src.models import Database, Framework, MemoryStore, ProjectConfig
 from src.plugin import Plugin, discover_plugins
 from src.utils import validate_project_name
 
+__all__ = [
+    "ask_database",
+    "ask_docker",
+    "ask_framework",
+    "ask_memory_store",
+    "ask_plugins",
+    "ask_project_name",
+    "main",
+    "run_post_generation_setup",
+]
+
 console = Console()
 
 
