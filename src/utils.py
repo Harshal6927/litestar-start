@@ -87,19 +87,3 @@ def write_file(path: Path, content: str) -> None:
     """Write content to a file, creating parent directories if needed."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
-
-
-def render_template(env: Environment, template_name: str, context: dict) -> str:
-    """Render a Jinja2 template with the given context.
-
-    Args:
-        env: The Jinja2 environment.
-        template_name: The name of the template to render.
-        context: The context dictionary to render the template with.
-
-    Returns:
-        The rendered template string.
-
-    """
-    template = env.get_template(template_name)
-    return template.render(**context)

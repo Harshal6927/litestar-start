@@ -6,7 +6,6 @@ from pathlib import Path
 from src.utils import (
     get_package_dir,
     get_template_env,
-    render_template,
     slugify,
     validate_project_name,
     write_file,
@@ -190,37 +189,3 @@ class TestWriteFile:
         content = "Hello 世界 🌍"
         write_file(file_path, content)
         assert file_path.read_text(encoding="utf-8") == content
-
-
-class TestRenderTemplate:
-    """Tests for render_template function."""
-
-    def test_renders_template(self, tmp_path: Path) -> None:
-        """Verify render_template renders a template."""
-        template_file = tmp_path / "test.txt"
-        template_file.write_text("Hello {{ name }}!")
-
-        env = get_template_env(tmp_path)
-        result = render_template(env, "test.txt", {"name": "World"})
-        assert result == "Hello World!"
-
-    def test_renders_with_multiple_variables(self, tmp_path: Path) -> None:
-        """Verify render_template handles multiple variables."""
-        template_file = tmp_path / "test.txt"
-        template_file.write_text("{{ greeting }} {{ name }}, age {{ age }}")
-
-        env = get_template_env(tmp_path)
-        result = render_template(env, "test.txt", {"greeting": "Hello", "name": "Alice", "age": 30})
-        assert result == "Hello Alice, age 30"
-
-    def test_renders_with_conditionals(self, tmp_path: Path) -> None:
-        """Verify render_template handles conditionals."""
-        template_file = tmp_path / "test.txt"
-        template_file.write_text("{% if show %}Visible{% endif %}")
-
-        env = get_template_env(tmp_path)
-        result_true = render_template(env, "test.txt", {"show": True})
-        result_false = render_template(env, "test.txt", {"show": False})
-
-        assert result_true == "Visible"
-        assert not result_false
