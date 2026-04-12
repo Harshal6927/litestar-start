@@ -1,5 +1,8 @@
 # ruff: noqa: PLR6301
+import importlib
 from pathlib import Path
+
+from pytest_mock import MockerFixture
 
 from src.Litestar.Plugins.AdvancedAlchemy import AdvancedAlchemyPlugin
 from src.Litestar.Plugins.LitestarSAQ import LitestarSAQPlugin
@@ -162,6 +165,44 @@ class TestDiscoverPlugins:
         """Verify discover_plugins returns empty list for nonexistent framework."""
         plugins = discover_plugins("NonExistent")
         assert plugins == []
+
+    def test_discover_plugins_handles_import_error(self, mocker: MockerFixture) -> None:
+        """Verify discover_plugins skips plugins that raise ImportError."""
+        original_import = importlib.import_module
+
+        def failing_import(name: str) -> object:
+            if "AdvancedAlchemy" in name:
+                msg = "Simulated import failure"
+                raise ImportError(msg)
+            return original_import(name)
+
+        mocker.patch("importlib.import_module", side_effect=failing_import)
+
+        plugins = discover_plugins("Litestar")
+
+        # Should have fewer plugins since AdvancedAlchemy failed to import
+        ids = [p.id for p in plugins]
+        assert "advanced_alchemy" not in ids
+        # Other plugins should still be discovered
+        assert len(plugins) >= 1
+
+    def test_discover_plugins_handles_attribute_error(self, mocker: MockerFixture) -> None:
+        """Verify discover_plugins skips plugins that raise AttributeError."""
+        original_import = importlib.import_module
+
+        def failing_import(name: str) -> object:
+            if "LitestarSAQ" in name:
+                msg = "Simulated attribute error"
+                raise AttributeError(msg)
+            return original_import(name)
+
+        mocker.patch("importlib.import_module", side_effect=failing_import)
+
+        plugins = discover_plugins("Litestar")
+
+        ids = [p.id for p in plugins]
+        assert "litestar_saq" not in ids
+        assert len(plugins) >= 1
 
 
 class TestAdvancedAlchemyPlugin:
