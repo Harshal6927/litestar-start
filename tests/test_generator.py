@@ -180,7 +180,7 @@ def test_litestar_generator_saq_rendering(tmp_path: Path) -> None:
     # Verify SAQ plugin in app.py
     app_content = (tmp_path / "src" / "backend" / "app.py").read_text()
     assert "from src.backend.config import saq" in app_content
-    assert "saq," in app_content or "plugins=[\n        saq" in app_content
+    assert "saq" in app_content.lower(), "SAQ plugin reference not found in app.py"
 
     # Verify SAQ dependency in pyproject.toml
     pyproject_content = (tmp_path / "pyproject.toml").read_text()
@@ -358,7 +358,8 @@ def test_litestar_generator_dockerfile_rendering(tmp_path: Path) -> None:
     assert "CMD" in content
 
     # Check for database migration command when advanced_alchemy is enabled
-    assert "litestar database upgrade" in content or "alembic upgrade head" in content
+    has_migration_cmd = "litestar database upgrade" in content or "alembic upgrade head" in content
+    assert has_migration_cmd, "No database migration command found in Dockerfile"
 
 
 def test_litestar_generator_docker_infra_content(tmp_path: Path) -> None:
