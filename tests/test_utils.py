@@ -4,7 +4,6 @@
 from pathlib import Path
 
 from src.utils import (
-    create_directory,
     get_package_dir,
     get_template_env,
     render_template,
@@ -157,31 +156,6 @@ class TestValidateProjectName:
         """Verify validate_project_name accepts single letter."""
         assert validate_project_name("a") is None
         assert validate_project_name("Z") is None
-
-
-class TestCreateDirectory:
-    """Tests for create_directory function."""
-
-    def test_creates_directory(self, tmp_path: Path) -> None:
-        """Verify create_directory creates a directory."""
-        new_dir = tmp_path / "test_dir"
-        create_directory(new_dir)
-        assert new_dir.exists()
-        assert new_dir.is_dir()
-
-    def test_creates_nested_directories(self, tmp_path: Path) -> None:
-        """Verify create_directory creates nested directories."""
-        new_dir = tmp_path / "parent" / "child" / "grandchild"
-        create_directory(new_dir)
-        assert new_dir.exists()
-        assert new_dir.is_dir()
-
-    def test_idempotent(self, tmp_path: Path) -> None:
-        """Verify create_directory is idempotent."""
-        new_dir = tmp_path / "test_dir"
-        create_directory(new_dir)
-        create_directory(new_dir)  # Should not raise
-        assert new_dir.exists()
 
 
 class TestWriteFile:

@@ -83,11 +83,6 @@ def validate_project_name(name: str) -> str | None:
     return None
 
 
-def create_directory(path: Path) -> None:
-    """Create a directory if it doesn't exist."""
-    path.mkdir(parents=True, exist_ok=True)
-
-
 def write_file(path: Path, content: str) -> None:
     """Write content to a file, creating parent directories if needed."""
     path.parent.mkdir(parents=True, exist_ok=True)
