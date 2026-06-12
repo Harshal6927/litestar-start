@@ -23,30 +23,25 @@ src/
     │   ├── gitignore.jinja
     │   ├── env.example.jinja
     │   └── readme.md.jinja
+    ├── App/             # Core application templates
+    │   └── *.jinja
     ├── Containers/      # Docker templates
     │   ├── Dockerfile.jinja
     │   ├── docker-compose.yml.jinja
     │   └── docker-compose.infra.yml.jinja
-    ├── app/             # Core application templates
-    │   ├── __init__.py.jinja
-    │   ├── config.py.jinja
-    │   └── main.py.jinja
     └── Plugins/         # Optional plugin templates
         ├── __init__.py
-        ├── SQLAlchemy/
+        ├── AdvancedAlchemy/
         │   ├── __init__.py
         │   └── Templates/
-        │       └── db/
-        │           ├── __init__.py.jinja
-        │           ├── config.py.jinja
-        │           └── models.py.jinja
-        └── JWT/
-            ├── __init__.py
-            └── Templates/
-                └── auth/
-                    ├── __init__.py.jinja
-                    ├── guards.py.jinja
-                    └── schemas.py.jinja
+        ├── LitestarSAQ/
+        │   ├── __init__.py
+        │   └── Templates/
+        ├── LitestarVite/
+        │   ├── __init__.py
+        │   └── Templates/
+        └── LitestarGranian/
+            └── __init__.py
 ```
 
 ## Core Components
@@ -73,7 +68,7 @@ Uses **msgspec** for efficient data serialization. Key models:
 
 - **Framework** - Enum of supported frameworks (Litestar, future: FastAPI)
 - **Database** - Enum of database options (PostgreSQL, SQLite, MySQL, None)
-- **Plugin** - Enum of available plugins (SQLAlchemy, JWT)
+- **MemoryStore** - Enum of memory store options (Redis, Valkey, None)
 - **ProjectConfig** - Main configuration struct containing all user choices
 - **DatabaseConfig** - Database-specific configuration (driver, port, URL)
 
@@ -104,27 +99,41 @@ All templates use **Jinja2** with `.jinja` extension. Template context includes:
 
 ### Adding a New Plugin
 
-1. Create plugin directory:
+1. Create plugin directory under the framework's `Plugins/` directory:
    ```
-   Litestar/Plugins/NewPlugin/
+   src/Litestar/Plugins/NewPlugin/
    ├── __init__.py
    └── Templates/
-       └── new_module/
-           └── *.jinja
+       └── *.jinja
    ```
 
-2. Add to `Plugin` enum in `models.py`:
+2. In `__init__.py`, create a class that extends `BasePlugin`:
    ```python
-   class Plugin(StrEnum):
-       ADVANCED_ALCHEMY = "AdvancedAlchemy"
-       LITESTAR_SAQ = "LitestarSAQ"
-       LITESTAR_VITE = "LitestarVite"
-       NEW_PLUGIN = "NewPlugin"  # Add this
+   from src.models import ProjectConfig
+   from src.plugin import BasePlugin
+
+
+   class NewPlugin(BasePlugin):
+       """Description of the plugin."""
+
+       @property
+       def name(self) -> str:
+           """Get the plugin display name."""
+           return "New Plugin"
+
+       @property
+       def description(self) -> str:
+           """Get the plugin description."""
+           return "Description for the CLI"
+
+       def is_applicable(self, config: ProjectConfig) -> bool:
+           """Check if this plugin is applicable."""
+           return True  # or check config fields
    ```
 
-3. Update CLI in `cli.py` to include the new option
+3. The plugin will be automatically discovered by `discover_plugins()`. No enum or CLI changes are needed.
 
-4. Update base templates if the plugin requires imports/configuration changes
+4. Add Jinja2 templates in the `Templates/` subdirectory. They will be rendered into `src/backend/` of the generated project.
 
 ### Adding a New Framework
 
@@ -190,18 +199,17 @@ A typical generated project looks like:
 
 ```
 my_project/
-├── app/
-│   ├── __init__.py
-│   ├── config.py
-│   └── main.py
-├── models/                # If AdvancedAlchemy selected
-│   ├── __init__.py
-│   ├── config.py
-│   └── models.py
-├── auth/                  # If JWT selected
-│   ├── __init__.py
-│   ├── guards.py
-│   └── schemas.py
+├── src/
+│   └── backend/
+│       ├── __init__.py
+│       ├── app.py
+│       ├── config.py
+│       ├── models/          # If AdvancedAlchemy selected
+│       │   └── users.py
+│       └── lib/             # If plugins are selected
+│           ├── dependencies.py
+│           ├── services.py
+│           └── tasks.py     # If SAQ selected
 ├── .env.example
 ├── .gitignore
 ├── pyproject.toml
@@ -221,8 +229,6 @@ my_project/
 ## Future Improvements
 
 - [ ] Add FastAPI framework support
-- [ ] Add more plugins (Structlog, Redis, CORS)
-- [ ] Add Alembic migrations setup
-- [ ] Add test scaffolding
-- [ ] Add GitHub Actions workflows
-- [ ] Add pre-commit configuration
+- [ ] Add more plugins (Structlog, CORS)
+- [ ] Add test scaffolding for generated projects
+- [ ] Add CI workflow for generated projects

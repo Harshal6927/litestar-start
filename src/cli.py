@@ -14,6 +14,17 @@ from src.models import Database, Framework, MemoryStore, ProjectConfig
 from src.plugin import Plugin, discover_plugins
 from src.utils import validate_project_name
 
+__all__ = [
+    "ask_database",
+    "ask_docker",
+    "ask_framework",
+    "ask_memory_store",
+    "ask_plugins",
+    "ask_project_name",
+    "main",
+    "run_post_generation_setup",
+]
+
 console = Console()
 
 
@@ -250,7 +261,7 @@ def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> 
 
     # Sort imports
     with console.status("[bold green]Sorting imports with isort..."):
-        subprocess.run(["ruff", "check", "--select", "I", "--fix", "."], cwd=output_dir, check=True)  # noqa: S607
+        subprocess.run(["uv", "run", "ruff", "check", "--select", "I", "--fix", "."], cwd=output_dir, check=True)  # noqa: S607
 
     # Ask if user wants to start the application
     console.print()

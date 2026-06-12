@@ -8,6 +8,13 @@ from typing import Protocol, runtime_checkable
 
 from src.models import ProjectConfig
 
+__all__ = [
+    "BasePlugin",
+    "Plugin",
+    "camel_to_snake",
+    "discover_plugins",
+]
+
 
 def camel_to_snake(name: str) -> str:
     """Convert CamelCase to snake_case.

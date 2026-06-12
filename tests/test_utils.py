@@ -4,10 +4,8 @@
 from pathlib import Path
 
 from src.utils import (
-    create_directory,
     get_package_dir,
     get_template_env,
-    render_template,
     slugify,
     validate_project_name,
     write_file,
@@ -122,6 +120,34 @@ class TestSlugify:
         assert slugify("My-Cool Project") == "my_cool_project"
         assert slugify("The-Great App Name") == "the_great_app_name"
 
+    def test_unicode_characters(self) -> None:
+        """Verify slugify strips unicode characters."""
+        assert slugify("café") == "caf"
+        assert slugify("naïve") == "nave"
+
+    def test_consecutive_hyphens(self) -> None:
+        """Verify slugify collapses consecutive hyphens to single underscore."""
+        assert slugify("my--project") == "my_project"
+        assert slugify("a---b") == "a_b"
+
+    def test_consecutive_spaces(self) -> None:
+        """Verify slugify collapses consecutive spaces to single underscore."""
+        assert slugify("my   project") == "my_project"
+
+    def test_mixed_consecutive_separators(self) -> None:
+        """Verify slugify collapses mixed hyphens/spaces to single underscore."""
+        assert slugify("my - project") == "my_project"
+        assert slugify("a - - b") == "a_b"
+
+    def test_leading_trailing_separators(self) -> None:
+        """Verify slugify handles leading/trailing hyphens and spaces."""
+        assert slugify("-project-") == "_project_"
+        assert slugify(" project ") == "_project_"
+
+    def test_underscores_preserved(self) -> None:
+        """Verify slugify preserves existing underscores."""
+        assert slugify("my_project") == "my_project"
+
 
 class TestValidateProjectName:
     """Tests for validate_project_name function."""
@@ -158,30 +184,17 @@ class TestValidateProjectName:
         assert validate_project_name("a") is None
         assert validate_project_name("Z") is None
 
+    def test_max_length_boundary(self) -> None:
+        """Verify validate_project_name at exact 50-char boundary."""
+        assert validate_project_name("x" * 49) is None
+        assert validate_project_name("x" * 50) is None
+        error = validate_project_name("x" * 51)
+        assert error is not None
+        assert "50" in error
 
-class TestCreateDirectory:
-    """Tests for create_directory function."""
-
-    def test_creates_directory(self, tmp_path: Path) -> None:
-        """Verify create_directory creates a directory."""
-        new_dir = tmp_path / "test_dir"
-        create_directory(new_dir)
-        assert new_dir.exists()
-        assert new_dir.is_dir()
-
-    def test_creates_nested_directories(self, tmp_path: Path) -> None:
-        """Verify create_directory creates nested directories."""
-        new_dir = tmp_path / "parent" / "child" / "grandchild"
-        create_directory(new_dir)
-        assert new_dir.exists()
-        assert new_dir.is_dir()
-
-    def test_idempotent(self, tmp_path: Path) -> None:
-        """Verify create_directory is idempotent."""
-        new_dir = tmp_path / "test_dir"
-        create_directory(new_dir)
-        create_directory(new_dir)  # Should not raise
-        assert new_dir.exists()
+    def test_numeric_only_name(self) -> None:
+        """Verify validate_project_name accepts numeric-only names (slugified to _123)."""
+        assert validate_project_name("123") is None
 
 
 class TestWriteFile:
@@ -216,37 +229,3 @@ class TestWriteFile:
         content = "Hello 世界 🌍"
         write_file(file_path, content)
         assert file_path.read_text(encoding="utf-8") == content
-
-
-class TestRenderTemplate:
-    """Tests for render_template function."""
-
-    def test_renders_template(self, tmp_path: Path) -> None:
-        """Verify render_template renders a template."""
-        template_file = tmp_path / "test.txt"
-        template_file.write_text("Hello {{ name }}!")
-
-        env = get_template_env(tmp_path)
-        result = render_template(env, "test.txt", {"name": "World"})
-        assert result == "Hello World!"
-
-    def test_renders_with_multiple_variables(self, tmp_path: Path) -> None:
-        """Verify render_template handles multiple variables."""
-        template_file = tmp_path / "test.txt"
-        template_file.write_text("{{ greeting }} {{ name }}, age {{ age }}")
-
-        env = get_template_env(tmp_path)
-        result = render_template(env, "test.txt", {"greeting": "Hello", "name": "Alice", "age": 30})
-        assert result == "Hello Alice, age 30"
-
-    def test_renders_with_conditionals(self, tmp_path: Path) -> None:
-        """Verify render_template handles conditionals."""
-        template_file = tmp_path / "test.txt"
-        template_file.write_text("{% if show %}Visible{% endif %}")
-
-        env = get_template_env(tmp_path)
-        result_true = render_template(env, "test.txt", {"show": True})
-        result_false = render_template(env, "test.txt", {"show": False})
-
-        assert result_true == "Visible"
-        assert not result_false

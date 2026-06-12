@@ -69,7 +69,22 @@ class LitestarGenerator:
         context: dict,
         root_template_dir: Path | None = None,
     ) -> None:
-        """Recursively render templates from a directory."""
+        """Recursively render Jinja2 templates from a directory into the output.
+
+        Walks `template_dir`, rendering every `*.jinja` file with the given
+        context and writing the result (sans `.jinja` suffix) into `output_subdir`.
+        Subdirectories are traversed recursively.
+
+        Args:
+            template_dir: Directory containing `.jinja` template files.
+            output_subdir: Target directory where rendered files are written.
+            env: The Jinja2 environment used for template loading.
+            context: Template variables passed to each render call.
+            root_template_dir: The root of the template tree, used to compute
+                template names relative to the Jinja2 loader. Defaults to
+                `template_dir` on first call and is preserved during recursion.
+
+        """
         if root_template_dir is None:
             root_template_dir = template_dir
 

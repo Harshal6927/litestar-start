@@ -6,6 +6,17 @@ from enum import StrEnum
 
 import msgspec
 
+from src.utils import slugify
+
+__all__ = [
+    "Database",
+    "DatabaseConfig",
+    "Framework",
+    "MemoryStore",
+    "MemoryStoreConfig",
+    "ProjectConfig",
+]
+
 
 class Framework(StrEnum):
     """Supported backend frameworks."""
@@ -44,7 +55,7 @@ class ProjectConfig(msgspec.Struct):
     @property
     def slug(self) -> str:
         """Return project name as a valid Python package name."""
-        return self.name.lower().replace("-", "_").replace(" ", "_")
+        return slugify(self.name)
 
     def has_plugin(self, plugin_id: str) -> bool:
         """Check if a plugin is enabled.

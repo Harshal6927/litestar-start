@@ -28,6 +28,6 @@ repos:
     hooks:
       - id: codespell
         exclude: "uv.lock"
-        args: ["--ignore-words-list=ure"]
+        args: ["--ignore-words-list=ure,caf"]
         additional_dependencies:
           - tomli

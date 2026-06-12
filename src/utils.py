@@ -5,7 +5,14 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-MIN_PROJECT_NAME_LENGTH = 1
+__all__ = [
+    "get_package_dir",
+    "get_template_env",
+    "slugify",
+    "validate_project_name",
+    "write_file",
+]
+
 MAX_PROJECT_NAME_LENGTH = 50
 
 
@@ -72,8 +79,6 @@ def validate_project_name(name: str) -> str | None:
     """
     if not name:
         return "Project name cannot be empty"
-    if len(name) < MIN_PROJECT_NAME_LENGTH:
-        return f"Project name must be at least {MIN_PROJECT_NAME_LENGTH} characters"
     if len(name) > MAX_PROJECT_NAME_LENGTH:
         return f"Project name must be less than {MAX_PROJECT_NAME_LENGTH} characters"
     # Check if slugified name is valid
@@ -83,28 +88,7 @@ def validate_project_name(name: str) -> str | None:
     return None
 
 
-def create_directory(path: Path) -> None:
-    """Create a directory if it doesn't exist."""
-    path.mkdir(parents=True, exist_ok=True)
-
-
 def write_file(path: Path, content: str) -> None:
     """Write content to a file, creating parent directories if needed."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
-
-
-def render_template(env: Environment, template_name: str, context: dict) -> str:
-    """Render a Jinja2 template with the given context.
-
-    Args:
-        env: The Jinja2 environment.
-        template_name: The name of the template to render.
-        context: The context dictionary to render the template with.
-
-    Returns:
-        The rendered template string.
-
-    """
-    template = env.get_template(template_name)
-    return template.render(**context)
