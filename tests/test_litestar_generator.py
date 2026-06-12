@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any, cast
 
 from pytest_mock import MockerFixture
 
@@ -493,6 +494,6 @@ def test_litestar_generator_post_generate_calls_plugin(tmp_path: Path, mocker: M
     # Verify the enabled plugin's post_generate was called
     for plugin in generator.plugins:
         if config.has_plugin(plugin.id):
-            plugin.post_generate.assert_called_once_with(config, tmp_path)  # type: ignore[unresolved-attribute]
+            cast("Any", plugin.post_generate).assert_called_once_with(config, tmp_path)
         else:
-            plugin.post_generate.assert_not_called()  # type: ignore[unresolved-attribute]
+            cast("Any", plugin.post_generate).assert_not_called()

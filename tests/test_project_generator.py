@@ -2,6 +2,7 @@
 """Unit tests for the ProjectGenerator orchestrator."""
 
 from pathlib import Path
+from typing import cast
 
 import pytest
 from pytest_mock import MockerFixture
@@ -107,9 +108,10 @@ class TestProjectGenerator:
 
         generator = ProjectGenerator(config, tmp_path)
         # Monkeypatch the framework to a value that's not handled
+
         generator.config = ProjectConfig(
             name="Test",
-            framework="UnsupportedFramework",  # type: ignore[arg-type]
+            framework=cast("Framework", "UnsupportedFramework"),
             database=Database.NONE,
             memory_store=MemoryStore.NONE,
             plugins=[],

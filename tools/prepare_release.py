@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-"""Prepare a new release by bumping version numbers."""
+"""Prepare a new release by bumping version numbers."""  # noqa: INP001
 
 import re
 from enum import StrEnum

@@ -16,7 +16,7 @@ license = "MIT"
 name = "litestar-start"
 readme = "README.md"
 requires-python = ">=3.13"
-version = "0.1.0b2"
+version = "0.1.0b3"
 
 [project.scripts]
 litestar-start = "src.cli:main"
@@ -47,6 +47,7 @@ lint.ignore = [
     "D104",    # Undocumented public package
     "PLC0415", # Import outside top level
     "PLR0911", # Too many return statements
+    "PLW0717", # Try clause contains too many statements
     "S101",    # Use of assert detected
     "SLF001",  # Private member accessed
     "RUF067",  # `__init__` module should only contain docstrings
