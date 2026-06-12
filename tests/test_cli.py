@@ -528,7 +528,7 @@ class TestRunPostGenerationSetup:
         run_post_generation_setup(generator, tmp_path)
 
         # Find the ruff call
-        ruff_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "ruff"]
+        ruff_calls = [call for call in mock_run.call_args_list if "ruff" in call[0][0]]
         assert len(ruff_calls) >= 1
         assert "check" in ruff_calls[0][0][0]
         assert "--select" in ruff_calls[0][0][0]

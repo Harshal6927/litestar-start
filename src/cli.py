@@ -261,7 +261,7 @@ def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> 
 
     # Sort imports
     with console.status("[bold green]Sorting imports with isort..."):
-        subprocess.run(["ruff", "check", "--select", "I", "--fix", "."], cwd=output_dir, check=True)  # noqa: S607
+        subprocess.run(["uv", "run", "ruff", "check", "--select", "I", "--fix", "."], cwd=output_dir, check=True)  # noqa: S607
 
     # Ask if user wants to start the application
     console.print()
