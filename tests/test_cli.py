@@ -407,7 +407,8 @@ class TestRunPostGenerationSetup:
         assert any(call[0][0] == ["uv", "sync"] for call in uv_calls)
 
     def test_runs_docker_compose_when_docker_infra(self, tmp_path: Path, mocker: MockerFixture) -> None:
-        """Verify run_post_generation_setup runs docker compose when docker_infra is True."""
+        """Verify run_post_generation_setup runs docker compose when docker_infra is True and docker is available."""
+        mocker.patch("src.cli.get_container_engine", return_value="docker")
         mock_run = mocker.patch("subprocess.run")
         mock_confirm = mocker.patch("questionary.confirm")
         mock_confirm.return_value.ask.return_value = False
@@ -430,6 +431,131 @@ class TestRunPostGenerationSetup:
         docker_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "docker"]
         assert len(docker_calls) >= 1
         assert "docker-compose.infra.yml" in docker_calls[0][0][0]
+
+    def test_runs_podman_compose_when_docker_missing_and_podman_available(
+        self,
+        tmp_path: Path,
+        mocker: MockerFixture,
+    ) -> None:
+        """Verify run_post_generation_setup runs podman compose when podman is available."""
+        mocker.patch("src.cli.get_container_engine", return_value="podman")
+        mock_run = mocker.patch("subprocess.run")
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = False
+
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.POSTGRESQL,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=True,
+        )
+        generator = ProjectGenerator(config, tmp_path)
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
+
+        run_post_generation_setup(generator, tmp_path)
+
+        # Find the podman compose call
+        podman_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "podman"]
+        assert len(podman_calls) >= 1
+        assert podman_calls[0][0][0] == ["podman", "compose", "-f", "docker-compose.infra.yml", "up", "-d"]
+
+    def test_prompts_and_uses_custom_engine_when_neither_available(
+        self,
+        tmp_path: Path,
+        mocker: MockerFixture,
+    ) -> None:
+        """Verify run_post_generation_setup prompts and uses custom engine when docker/podman are missing."""
+        mocker.patch("src.cli.get_container_engine", return_value=None)
+        mock_run = mocker.patch("subprocess.run")
+        mock_confirm = mocker.patch("questionary.confirm")
+        # First confirm is for custom engine (True), second confirm is for start app (False)
+        mock_confirm.return_value.ask.side_effect = [True, False]
+        mock_text = mocker.patch("questionary.text")
+        mock_text.return_value.ask.return_value = "nerdctl"
+
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.POSTGRESQL,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=True,
+        )
+        generator = ProjectGenerator(config, tmp_path)
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
+
+        run_post_generation_setup(generator, tmp_path)
+
+        # Find the custom engine compose call
+        custom_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "nerdctl"]
+        assert len(custom_calls) >= 1
+        assert custom_calls[0][0][0] == ["nerdctl", "compose", "-f", "docker-compose.infra.yml", "up", "-d"]
+
+    def test_skips_infra_when_neither_available_and_user_declines(
+        self,
+        tmp_path: Path,
+        mocker: MockerFixture,
+    ) -> None:
+        """Verify run_post_generation_setup skips infra startup when user declines custom engine."""
+        mocker.patch("src.cli.get_container_engine", return_value=None)
+        mock_run = mocker.patch("subprocess.run")
+        mock_confirm = mocker.patch("questionary.confirm")
+        # First confirm is for custom engine (False), second confirm is for start app (False)
+        mock_confirm.return_value.ask.side_effect = [False, False]
+
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.POSTGRESQL,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=True,
+        )
+        generator = ProjectGenerator(config, tmp_path)
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
+
+        run_post_generation_setup(generator, tmp_path)
+
+        # Verify no compose calls made
+        compose_calls = [call for call in mock_run.call_args_list if len(call[0][0]) > 1 and call[0][0][1] == "compose"]
+        assert len(compose_calls) == 0
+
+    def test_skips_infra_when_user_cancels_custom_engine_prompt(
+        self,
+        tmp_path: Path,
+        mocker: MockerFixture,
+    ) -> None:
+        """Verify run_post_generation_setup skips infra startup when user cancels custom engine input."""
+        mocker.patch("src.cli.get_container_engine", return_value=None)
+        mock_run = mocker.patch("subprocess.run")
+        mock_confirm = mocker.patch("questionary.confirm")
+        # First confirm is for custom engine (True), second confirm is for start app (False)
+        mock_confirm.return_value.ask.side_effect = [True, False]
+        mock_text = mocker.patch("questionary.text")
+        mock_text.return_value.ask.return_value = None
+
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.POSTGRESQL,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_infra=True,
+        )
+        generator = ProjectGenerator(config, tmp_path)
+        generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
+
+        run_post_generation_setup(generator, tmp_path)
+
+        # Verify no compose calls made
+        compose_calls = [call for call in mock_run.call_args_list if len(call[0][0]) > 1 and call[0][0][1] == "compose"]
+        assert len(compose_calls) == 0
 
     def test_skips_docker_compose_when_not_needed(self, tmp_path: Path, mocker: MockerFixture) -> None:
         """Verify run_post_generation_setup skips docker compose when not needed."""

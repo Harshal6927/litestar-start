@@ -3,7 +3,10 @@
 
 from pathlib import Path
 
+from pytest_mock import MockerFixture
+
 from src.utils import (
+    get_container_engine,
     get_package_dir,
     get_template_env,
     slugify,
@@ -229,3 +232,30 @@ class TestWriteFile:
         content = "Hello 世界 🌍"
         write_file(file_path, content)
         assert file_path.read_text(encoding="utf-8") == content
+
+
+class TestGetContainerEngine:
+    """Tests for get_container_engine function."""
+
+    def test_docker_preferred_when_both_available(self, mocker: MockerFixture) -> None:
+        """Verify docker is returned when both docker and podman exist."""
+        mocker.patch("shutil.which", side_effect=lambda cmd: f"/usr/bin/{cmd}")
+        assert get_container_engine() == "docker"
+
+    def test_podman_used_when_docker_missing(self, mocker: MockerFixture) -> None:
+        """Verify podman is returned when docker is missing but podman exists."""
+
+        def mock_which(cmd: str) -> str | None:
+            if cmd == "docker":
+                return None
+            if cmd == "podman":
+                return "/usr/bin/podman"
+            return None
+
+        mocker.patch("shutil.which", side_effect=mock_which)
+        assert get_container_engine() == "podman"
+
+    def test_returns_none_when_neither_available(self, mocker: MockerFixture) -> None:
+        """Verify None is returned when neither docker nor podman exists."""
+        mocker.patch("shutil.which", return_value=None)
+        assert get_container_engine() is None

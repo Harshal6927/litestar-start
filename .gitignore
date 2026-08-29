@@ -10,8 +10,5 @@ wheels/
 .venv
 .tmp
 
-.github/prompts
-docs/prd
-.geminiignore
-.agent/
-.opencode/
+.vscode/
+docs/superpowers/

@@ -1,11 +1,13 @@
 """Utility functions for project generation."""
 
 import re
+import shutil
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 __all__ = [
+    "get_container_engine",
     "get_package_dir",
     "get_template_env",
     "slugify",
@@ -14,6 +16,22 @@ __all__ = [
 ]
 
 MAX_PROJECT_NAME_LENGTH = 50
+
+
+def get_container_engine() -> str | None:
+    """Detect available container engine (Docker or Podman).
+
+    Returns:
+        'docker' if docker executable is found in PATH,
+        'podman' if podman executable is found in PATH,
+        None if neither executable is installed.
+
+    """
+    if shutil.which("docker"):
+        return "docker"
+    if shutil.which("podman"):
+        return "podman"
+    return None
 
 
 def get_package_dir() -> Path:

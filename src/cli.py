@@ -12,7 +12,7 @@ from rich.text import Text
 from src.generator import ProjectGenerator
 from src.models import Database, Framework, MemoryStore, ProjectConfig
 from src.plugin import Plugin, discover_plugins
-from src.utils import validate_project_name
+from src.utils import get_container_engine, validate_project_name
 
 __all__ = [
     "ask_database",
@@ -232,16 +232,34 @@ def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> 
         subprocess.run(["uv", "sync"], cwd=output_dir, check=True, capture_output=True)  # noqa: S607
     console.print("[bold green]✓[/bold green] Dependencies installed")
 
-    # Start docker infrastructure if needed
+    # Start container infrastructure if needed
     if config.needs_docker_infra:
-        with console.status("[bold green]Starting Docker infrastructure..."):
-            subprocess.run(
-                ["docker", "compose", "-f", "docker-compose.infra.yml", "up", "-d"],  # noqa: S607
-                cwd=output_dir,
-                check=True,
-                capture_output=True,
-            )
-        console.print("[bold green]✓[/bold green] Docker infrastructure started")
+        engine = get_container_engine()
+        if engine is None:
+            console.print("[yellow]Neither Docker nor Podman was detected on your system.[/yellow]")
+            use_custom = questionary.confirm(
+                "Would you like to specify an alternative Docker-compatible command (e.g., nerdctl)?",
+                default=False,
+            ).ask()
+            if use_custom:
+                custom_cmd = questionary.text(
+                    "Enter alternative container command:",
+                    validate=lambda val: True if (val and shutil.which(val.strip())) else "Command not found in PATH",
+                ).ask()
+                if custom_cmd:
+                    engine = custom_cmd.strip()
+
+        if engine:
+            with console.status(f"[bold green]Starting {engine.capitalize()} infrastructure..."):
+                subprocess.run(  # noqa: S603
+                    [engine, "compose", "-f", "docker-compose.infra.yml", "up", "-d"],
+                    cwd=output_dir,
+                    check=True,
+                    capture_output=True,
+                )
+            console.print(f"[bold green]✓[/bold green] {engine.capitalize()} infrastructure started")
+        else:
+            console.print("[yellow]Skipping container infrastructure setup.[/yellow]")
 
     # Create .dockerignore from .gitignore
     if config.docker:
