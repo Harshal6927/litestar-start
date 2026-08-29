@@ -46,7 +46,7 @@ class LitestarGenerator:
             "store_config": store_config,
             "has_store": self.config.memory_store.value != "None",
             "docker": self.config.docker,
-            "docker_infra": self.config.docker_infra,
+            "docker_dev_infra": self.config.docker_dev_infra,
         }
 
         # Add plugin-specific context
@@ -119,7 +119,7 @@ class LitestarGenerator:
         self._generate_plugins(context)
 
         # Generate Docker files if requested
-        if self.config.docker or self.config.needs_docker_infra:
+        if self.config.docker or self.config.needs_docker_dev_infra:
             self._generate_containers(context)
 
     def post_generate(self) -> None:
@@ -174,8 +174,8 @@ class LitestarGenerator:
             content = template.render(**context)
             write_file(self.output_dir / "docker-compose.yml", content)
 
-        # Generate docker-compose.infra.yml if needed
-        if self.config.needs_docker_infra:
-            template = env.get_template("docker-compose.infra.yml.jinja")
+        # Generate docker-compose.dev-infra.yml if needed
+        if self.config.needs_docker_dev_infra:
+            template = env.get_template("docker-compose.dev-infra.yml.jinja")
             content = template.render(**context)
-            write_file(self.output_dir / "docker-compose.infra.yml", content)
+            write_file(self.output_dir / "docker-compose.dev-infra.yml", content)

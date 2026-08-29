@@ -24,7 +24,7 @@ def make_config() -> Callable[..., ProjectConfig]:
         memory_store: MemoryStore = MemoryStore.NONE,
         plugins: list[str] | None = None,
         docker: bool = False,  # noqa: FBT001, FBT002
-        docker_infra: bool = False,  # noqa: FBT001, FBT002
+        docker_dev_infra: bool = False,  # noqa: FBT001, FBT002
     ) -> ProjectConfig:
         return ProjectConfig(
             name=name,
@@ -33,7 +33,7 @@ def make_config() -> Callable[..., ProjectConfig]:
             memory_store=memory_store,
             plugins=plugins or [],
             docker=docker,
-            docker_infra=docker_infra,
+            docker_dev_infra=docker_dev_infra,
         )
 
     return _make_config

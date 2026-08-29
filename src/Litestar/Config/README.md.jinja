@@ -5,7 +5,7 @@ A Litestar application generated with [litestar-start](https://github.com/Harsha
 {% if docker and database.value not in ['None', 'SQLite'] %}
 ## Docker start
 
-> NOTE: Ensure dev infra is stopped by `make stop-infra`
+> NOTE: Ensure dev infra is stopped by `make stop-dev-infra`
 
 Create migrations:
 
@@ -37,7 +37,7 @@ make start
 
 - Python 3.13+
 - [uv](https://docs.astral.sh/uv/) (recommended) or pip
-{% if docker_infra %}
+{% if docker_dev_infra %}
 - Docker & Docker Compose (for local database)
 {% endif %}
 
@@ -54,12 +54,12 @@ uv sync
 cp .env.example .env
 ```
 
-{% if docker_infra %}
+{% if docker_dev_infra %}
 ### Start Infrastructure
 
 ```bash
 # Start database container
-docker compose -f docker-compose.infra.yml up -d
+docker compose -f docker-compose.dev-infra.yml up -d
 ```
 
 {% endif %}

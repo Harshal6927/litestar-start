@@ -91,7 +91,7 @@ class TestBasePlugin:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert plugin.is_applicable(config) is True
 
@@ -111,7 +111,7 @@ class TestBasePlugin:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert plugin.get_template_context(config) == {}
 
@@ -131,7 +131,7 @@ class TestBasePlugin:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         # Should not raise
         plugin.post_generate(config, tmp_path)
@@ -218,7 +218,7 @@ class TestAdvancedAlchemyPlugin:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert plugin.is_applicable(config) is True
 
@@ -232,7 +232,7 @@ class TestAdvancedAlchemyPlugin:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert plugin.is_applicable(config) is False
 
@@ -250,7 +250,7 @@ class TestLitestarSAQPlugin:
             memory_store=MemoryStore.REDIS,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert plugin.is_applicable(config) is True
 
@@ -264,6 +264,6 @@ class TestLitestarSAQPlugin:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert plugin.is_applicable(config) is False

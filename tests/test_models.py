@@ -20,7 +20,7 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert config.slug == "myproject"
 
@@ -33,7 +33,7 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert config.slug == "my_project_name"
 
@@ -46,7 +46,7 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert config.slug == "my_project_name"
 
@@ -59,7 +59,7 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert config.slug == "my_cool_project"
 
@@ -72,7 +72,7 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=["advanced_alchemy", "litestar_saq"],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert config.has_plugin("advanced_alchemy") is True
         assert config.has_plugin("litestar_saq") is True
@@ -86,13 +86,13 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=["advanced_alchemy"],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert config.has_plugin("litestar_saq") is False
         assert config.has_plugin("nonexistent") is False
 
-    def test_needs_docker_infra_false_when_docker_infra_disabled(self) -> None:
-        """Verify needs_docker_infra is False when docker_infra flag is False."""
+    def test_needs_docker_dev_infra_false_when_docker_dev_infra_disabled(self) -> None:
+        """Verify needs_docker_dev_infra is False when docker_dev_infra flag is False."""
         config = ProjectConfig(
             name="Test",
             framework=Framework.LITESTAR,
@@ -100,12 +100,12 @@ class TestProjectConfig:
             memory_store=MemoryStore.REDIS,
             plugins=[],
             docker=False,
-            docker_infra=False,  # Disabled
+            docker_dev_infra=False,  # Disabled
         )
-        assert config.needs_docker_infra is False
+        assert config.needs_docker_dev_infra is False
 
-    def test_needs_docker_infra_true_with_postgresql(self) -> None:
-        """Verify needs_docker_infra is True with PostgreSQL."""
+    def test_needs_docker_dev_infra_true_with_postgresql(self) -> None:
+        """Verify needs_docker_dev_infra is True with PostgreSQL."""
         config = ProjectConfig(
             name="Test",
             framework=Framework.LITESTAR,
@@ -113,12 +113,12 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
-        assert config.needs_docker_infra is True
+        assert config.needs_docker_dev_infra is True
 
-    def test_needs_docker_infra_true_with_mysql(self) -> None:
-        """Verify needs_docker_infra is True with MySQL."""
+    def test_needs_docker_dev_infra_true_with_mysql(self) -> None:
+        """Verify needs_docker_dev_infra is True with MySQL."""
         config = ProjectConfig(
             name="Test",
             framework=Framework.LITESTAR,
@@ -126,12 +126,12 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
-        assert config.needs_docker_infra is True
+        assert config.needs_docker_dev_infra is True
 
-    def test_needs_docker_infra_false_with_sqlite(self) -> None:
-        """Verify needs_docker_infra is False with SQLite."""
+    def test_needs_docker_dev_infra_false_with_sqlite(self) -> None:
+        """Verify needs_docker_dev_infra is False with SQLite."""
         config = ProjectConfig(
             name="Test",
             framework=Framework.LITESTAR,
@@ -139,12 +139,12 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
-        assert config.needs_docker_infra is False
+        assert config.needs_docker_dev_infra is False
 
-    def test_needs_docker_infra_false_with_no_database(self) -> None:
-        """Verify needs_docker_infra is False with no database."""
+    def test_needs_docker_dev_infra_false_with_no_database(self) -> None:
+        """Verify needs_docker_dev_infra is False with no database."""
         config = ProjectConfig(
             name="Test",
             framework=Framework.LITESTAR,
@@ -152,12 +152,12 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
-        assert config.needs_docker_infra is False
+        assert config.needs_docker_dev_infra is False
 
-    def test_needs_docker_infra_true_with_redis(self) -> None:
-        """Verify needs_docker_infra is True with Redis."""
+    def test_needs_docker_dev_infra_true_with_redis(self) -> None:
+        """Verify needs_docker_dev_infra is True with Redis."""
         config = ProjectConfig(
             name="Test",
             framework=Framework.LITESTAR,
@@ -165,12 +165,12 @@ class TestProjectConfig:
             memory_store=MemoryStore.REDIS,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
-        assert config.needs_docker_infra is True
+        assert config.needs_docker_dev_infra is True
 
-    def test_needs_docker_infra_true_with_valkey(self) -> None:
-        """Verify needs_docker_infra is True with Valkey."""
+    def test_needs_docker_dev_infra_true_with_valkey(self) -> None:
+        """Verify needs_docker_dev_infra is True with Valkey."""
         config = ProjectConfig(
             name="Test",
             framework=Framework.LITESTAR,
@@ -178,12 +178,12 @@ class TestProjectConfig:
             memory_store=MemoryStore.VALKEY,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
-        assert config.needs_docker_infra is True
+        assert config.needs_docker_dev_infra is True
 
-    def test_needs_docker_infra_true_with_postgres_and_redis(self) -> None:
-        """Verify needs_docker_infra is True with PostgreSQL and Redis."""
+    def test_needs_docker_dev_infra_true_with_postgres_and_redis(self) -> None:
+        """Verify needs_docker_dev_infra is True with PostgreSQL and Redis."""
         config = ProjectConfig(
             name="Test",
             framework=Framework.LITESTAR,
@@ -191,9 +191,9 @@ class TestProjectConfig:
             memory_store=MemoryStore.REDIS,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
-        assert config.needs_docker_infra is True
+        assert config.needs_docker_dev_infra is True
 
     def test_slug_removes_special_characters(self) -> None:
         """Verify slug removes special characters like @, #, $."""
@@ -204,7 +204,7 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert config.slug == "myprojectname"
 
@@ -217,7 +217,7 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert config.slug == "_123app"
 
@@ -230,7 +230,7 @@ class TestProjectConfig:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert config.slug == "my_project_name"
 

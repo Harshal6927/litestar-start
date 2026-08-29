@@ -12,7 +12,7 @@ Interactive CLI to scaffold fullstack [Litestar](https://litestar.dev) projects 
   - **Litestar SAQ** — background task queue powered by SAQ (requires a memory store)
   - **Litestar Vite** — frontend asset bundling with Vite
   - **Litestar Granian** — high-performance Granian ASGI server
-- **Docker** — optional Dockerfile and `docker-compose.infra.yml` for local development
+- **Docker** — optional Dockerfile and `docker-compose.dev-infra.yml` for local development
 - **Post-generation setup** — automatic `git init`, `uv sync`, Docker infrastructure startup, and import sorting
 
 ## Requirements

@@ -18,7 +18,7 @@ def test_litestar_generator_context(tmp_path: Path) -> None:
         memory_store=MemoryStore.NONE,
         plugins=["advanced_alchemy"],
         docker=True,
-        docker_infra=False,
+        docker_dev_infra=False,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -40,7 +40,7 @@ def test_litestar_generator_no_plugins(tmp_path: Path) -> None:
         memory_store=MemoryStore.NONE,
         plugins=[],
         docker=False,
-        docker_infra=False,
+        docker_dev_infra=False,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -59,7 +59,7 @@ def test_litestar_generator_plugins_rendering(tmp_path: Path) -> None:
         memory_store=MemoryStore.NONE,
         plugins=["advanced_alchemy"],
         docker=False,
-        docker_infra=True,
+        docker_dev_infra=True,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -86,7 +86,7 @@ def test_litestar_generator_memory_store_context(tmp_path: Path) -> None:
         memory_store=MemoryStore.REDIS,
         plugins=[],
         docker=True,
-        docker_infra=True,
+        docker_dev_infra=True,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -107,7 +107,7 @@ def test_litestar_generator_docker_compose_rendering(tmp_path: Path) -> None:
         memory_store=MemoryStore.REDIS,
         plugins=[],
         docker=True,
-        docker_infra=False,
+        docker_dev_infra=False,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -140,7 +140,7 @@ def test_litestar_generator_saq_context(tmp_path: Path) -> None:
         memory_store=MemoryStore.REDIS,
         plugins=["litestar_saq"],
         docker=False,
-        docker_infra=False,
+        docker_dev_infra=False,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -160,7 +160,7 @@ def test_litestar_generator_saq_rendering(tmp_path: Path) -> None:
         memory_store=MemoryStore.REDIS,
         plugins=["litestar_saq"],
         docker=False,
-        docker_infra=False,
+        docker_dev_infra=False,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -199,7 +199,7 @@ def test_litestar_generator_granian_context(tmp_path: Path) -> None:
         memory_store=MemoryStore.NONE,
         plugins=["litestar_granian"],
         docker=False,
-        docker_infra=False,
+        docker_dev_infra=False,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -217,7 +217,7 @@ def test_litestar_generator_granian_rendering(tmp_path: Path) -> None:
         memory_store=MemoryStore.NONE,
         plugins=["litestar_granian"],
         docker=False,
-        docker_infra=False,
+        docker_dev_infra=False,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -246,7 +246,7 @@ def test_litestar_generator_mysql_context(tmp_path: Path) -> None:
         memory_store=MemoryStore.NONE,
         plugins=["advanced_alchemy"],
         docker=False,
-        docker_infra=True,
+        docker_dev_infra=True,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -260,7 +260,7 @@ def test_litestar_generator_mysql_context(tmp_path: Path) -> None:
 
 
 def test_litestar_generator_mysql_rendering(tmp_path: Path) -> None:
-    """Verify that MySQL database is correctly rendered in docker-compose.infra.yml."""
+    """Verify that MySQL database is correctly rendered in docker-compose.dev-infra.yml."""
     config = ProjectConfig(
         name="MySQL Test",
         framework=Framework.LITESTAR,
@@ -268,16 +268,16 @@ def test_litestar_generator_mysql_rendering(tmp_path: Path) -> None:
         memory_store=MemoryStore.NONE,
         plugins=["advanced_alchemy"],
         docker=False,
-        docker_infra=True,
+        docker_dev_infra=True,
     )
 
     generator = LitestarGenerator(config, tmp_path)
     generator.generate()
 
-    # Verify docker-compose.infra.yml exists
-    docker_infra = tmp_path / "docker-compose.infra.yml"
-    assert docker_infra.exists()
-    content = docker_infra.read_text()
+    # Verify docker-compose.dev-infra.yml exists
+    docker_dev_infra = tmp_path / "docker-compose.dev-infra.yml"
+    assert docker_dev_infra.exists()
+    content = docker_dev_infra.read_text()
 
     # Check MySQL service
     assert "mysql:" in content
@@ -295,7 +295,7 @@ def test_litestar_generator_valkey_context(tmp_path: Path) -> None:
         memory_store=MemoryStore.VALKEY,
         plugins=[],
         docker=False,
-        docker_infra=True,
+        docker_dev_infra=True,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -308,7 +308,7 @@ def test_litestar_generator_valkey_context(tmp_path: Path) -> None:
 
 
 def test_litestar_generator_valkey_rendering(tmp_path: Path) -> None:
-    """Verify that Valkey memory store is correctly rendered in docker-compose.infra.yml."""
+    """Verify that Valkey memory store is correctly rendered in docker-compose.dev-infra.yml."""
     config = ProjectConfig(
         name="Valkey Test",
         framework=Framework.LITESTAR,
@@ -316,16 +316,16 @@ def test_litestar_generator_valkey_rendering(tmp_path: Path) -> None:
         memory_store=MemoryStore.VALKEY,
         plugins=[],
         docker=False,
-        docker_infra=True,
+        docker_dev_infra=True,
     )
 
     generator = LitestarGenerator(config, tmp_path)
     generator.generate()
 
-    # Verify docker-compose.infra.yml exists
-    docker_infra = tmp_path / "docker-compose.infra.yml"
-    assert docker_infra.exists()
-    content = docker_infra.read_text()
+    # Verify docker-compose.dev-infra.yml exists
+    docker_dev_infra = tmp_path / "docker-compose.dev-infra.yml"
+    assert docker_dev_infra.exists()
+    content = docker_dev_infra.read_text()
 
     # Check Valkey service
     assert "valkey:" in content
@@ -342,7 +342,7 @@ def test_litestar_generator_dockerfile_rendering(tmp_path: Path) -> None:
         memory_store=MemoryStore.NONE,
         plugins=["advanced_alchemy"],
         docker=True,
-        docker_infra=False,
+        docker_dev_infra=False,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -365,8 +365,8 @@ def test_litestar_generator_dockerfile_rendering(tmp_path: Path) -> None:
     assert has_migration_cmd, "No database migration command found in Dockerfile"
 
 
-def test_litestar_generator_docker_infra_content(tmp_path: Path) -> None:
-    """Verify docker-compose.infra.yml content is correctly rendered."""
+def test_litestar_generator_docker_dev_infra_content(tmp_path: Path) -> None:
+    """Verify docker-compose.dev-infra.yml content is correctly rendered."""
     config = ProjectConfig(
         name="Infra Test",
         framework=Framework.LITESTAR,
@@ -374,16 +374,16 @@ def test_litestar_generator_docker_infra_content(tmp_path: Path) -> None:
         memory_store=MemoryStore.REDIS,
         plugins=[],
         docker=False,
-        docker_infra=True,
+        docker_dev_infra=True,
     )
 
     generator = LitestarGenerator(config, tmp_path)
     generator.generate()
 
-    # Verify docker-compose.infra.yml exists
-    docker_infra = tmp_path / "docker-compose.infra.yml"
-    assert docker_infra.exists()
-    content = docker_infra.read_text()
+    # Verify docker-compose.dev-infra.yml exists
+    docker_dev_infra = tmp_path / "docker-compose.dev-infra.yml"
+    assert docker_dev_infra.exists()
+    content = docker_dev_infra.read_text()
 
     # Check PostgreSQL service
     assert "postgres:" in content
@@ -407,7 +407,7 @@ def test_litestar_generator_multi_plugin_rendering(tmp_path: Path) -> None:
         memory_store=MemoryStore.REDIS,
         plugins=["advanced_alchemy", "litestar_saq", "litestar_granian"],
         docker=False,
-        docker_infra=True,
+        docker_dev_infra=True,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -445,7 +445,7 @@ def test_litestar_generator_vite_context(tmp_path: Path) -> None:
         memory_store=MemoryStore.NONE,
         plugins=["litestar_vite"],
         docker=False,
-        docker_infra=False,
+        docker_dev_infra=False,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -463,7 +463,7 @@ def test_litestar_generator_post_generate_no_plugins(tmp_path: Path) -> None:
         memory_store=MemoryStore.NONE,
         plugins=[],
         docker=False,
-        docker_infra=False,
+        docker_dev_infra=False,
     )
 
     generator = LitestarGenerator(config, tmp_path)
@@ -480,7 +480,7 @@ def test_litestar_generator_post_generate_calls_plugin(tmp_path: Path, mocker: M
         memory_store=MemoryStore.NONE,
         plugins=["advanced_alchemy"],
         docker=False,
-        docker_infra=False,
+        docker_dev_infra=False,
     )
 
     generator = LitestarGenerator(config, tmp_path)

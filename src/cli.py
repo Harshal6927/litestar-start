@@ -185,7 +185,7 @@ def ask_docker() -> tuple[bool, bool]:
     """Ask for Docker configuration.
 
     Returns:
-        A tuple of (generate_dockerfile, generate_docker_infra).
+        A tuple of (generate_dockerfile, generate_docker_dev_infra).
 
     Raises:
         SystemExit: If the user cancels the operation (e.g., presses Ctrl+C).
@@ -200,16 +200,16 @@ def ask_docker() -> tuple[bool, bool]:
         console.print("\n[yellow]Cancelled.[/yellow]")
         raise SystemExit(0)
 
-    docker_infra = questionary.confirm(
-        "Generate docker-compose.infra.yml for local development (database, etc.)?",
+    docker_dev_infra = questionary.confirm(
+        "Generate docker-compose.dev-infra.yml for local development (database, etc.)?",
         default=True,
     ).ask()
 
-    if docker_infra is None:
+    if docker_dev_infra is None:
         console.print("\n[yellow]Cancelled.[/yellow]")
         raise SystemExit(0)
 
-    return docker, docker_infra
+    return docker, docker_dev_infra
 
 
 def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> None:
@@ -233,7 +233,7 @@ def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> 
     console.print("[bold green]✓[/bold green] Dependencies installed")
 
     # Start container infrastructure if needed
-    if config.needs_docker_infra:
+    if config.needs_docker_dev_infra:
         engine = get_container_engine()
         if engine is None:
             console.print("[yellow]Neither Docker nor Podman was detected on your system.[/yellow]")
@@ -250,16 +250,16 @@ def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> 
                     engine = custom_cmd.strip()
 
         if engine:
-            with console.status(f"[bold green]Starting {engine.capitalize()} infrastructure..."):
+            with console.status(f"[bold green]Starting {engine.capitalize()} dev infrastructure..."):
                 subprocess.run(  # noqa: S603
-                    [engine, "compose", "-f", "docker-compose.infra.yml", "up", "-d"],
+                    [engine, "compose", "-f", "docker-compose.dev-infra.yml", "up", "-d"],
                     cwd=output_dir,
                     check=True,
                     capture_output=True,
                 )
-            console.print(f"[bold green]✓[/bold green] {engine.capitalize()} infrastructure started")
+            console.print(f"[bold green]✓[/bold green] {engine.capitalize()} dev infrastructure started")
         else:
-            console.print("[yellow]Skipping container infrastructure setup.[/yellow]")
+            console.print("[yellow]Skipping dev container infrastructure setup.[/yellow]")
 
     # Create .dockerignore from .gitignore
     if config.docker:
@@ -325,15 +325,15 @@ def main() -> None:
             memory_store=memory_store,
             plugins=[],  # Will be populated next
             docker=False,  # Placeholder
-            docker_infra=False,  # Placeholder
+            docker_dev_infra=False,  # Placeholder
         )
 
         plugins = ask_plugins(config, discovered_plugins)
         config.plugins = plugins
 
-        docker, docker_infra = ask_docker()
+        docker, docker_dev_infra = ask_docker()
         config.docker = docker
-        config.docker_infra = docker_infra
+        config.docker_dev_infra = docker_dev_infra
 
         # Show summary
         console.print()
@@ -345,7 +345,7 @@ def main() -> None:
                 f"[bold]Memory Store:[/bold] {config.memory_store.value}\n"
                 f"[bold]Plugins:[/bold] {', '.join(config.plugins) or 'None'}\n"
                 f"[bold]Docker:[/bold] {'Yes' if config.docker else 'No'}\n"
-                f"[bold]Docker Infra:[/bold] {'Yes' if config.docker_infra else 'No'}",
+                f"[bold]Docker Dev Infra:[/bold] {'Yes' if config.docker_dev_infra else 'No'}",
                 title="Configuration Summary",
             ),
         )

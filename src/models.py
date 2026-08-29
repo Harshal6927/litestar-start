@@ -50,7 +50,7 @@ class ProjectConfig(msgspec.Struct):
     memory_store: MemoryStore
     plugins: list[str]
     docker: bool
-    docker_infra: bool
+    docker_dev_infra: bool
 
     @property
     def slug(self) -> str:
@@ -70,11 +70,11 @@ class ProjectConfig(msgspec.Struct):
         return plugin_id in self.plugins
 
     @property
-    def needs_docker_infra(self) -> bool:
-        """Check if docker-compose.infra.yml should be generated."""
+    def needs_docker_dev_infra(self) -> bool:
+        """Check if docker-compose.dev-infra.yml should be generated."""
         has_db = self.database in {Database.POSTGRESQL, Database.MYSQL}
         has_store = self.memory_store in {MemoryStore.REDIS, MemoryStore.VALKEY}
-        return self.docker_infra and (has_db or has_store)
+        return self.docker_dev_infra and (has_db or has_store)
 
 
 class DatabaseConfig(msgspec.Struct):

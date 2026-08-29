@@ -23,7 +23,7 @@ class TestProjectGenerator:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
 
         generator = ProjectGenerator(config, tmp_path)
@@ -44,7 +44,7 @@ class TestProjectGenerator:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
 
         generator = ProjectGenerator(config, output_dir)
@@ -62,7 +62,7 @@ class TestProjectGenerator:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
 
         generator = ProjectGenerator(config, tmp_path)
@@ -85,7 +85,7 @@ class TestProjectGenerator:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
 
         generator = ProjectGenerator(config, tmp_path)
@@ -103,7 +103,7 @@ class TestProjectGenerator:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
 
         generator = ProjectGenerator(config, tmp_path)
@@ -116,7 +116,7 @@ class TestProjectGenerator:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
 
         with pytest.raises(NotImplementedError, match="not yet supported"):

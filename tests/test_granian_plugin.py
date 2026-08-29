@@ -33,7 +33,7 @@ class TestLitestarGranianPlugin:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert plugin.is_applicable(config) is True
 
@@ -47,7 +47,7 @@ class TestLitestarGranianPlugin:
             memory_store=MemoryStore.REDIS,
             plugins=["litestar_granian"],
             docker=True,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
         assert plugin.is_applicable(config) is True
 
@@ -61,6 +61,6 @@ class TestLitestarGranianPlugin:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         assert plugin.get_template_context(config) == {}

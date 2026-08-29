@@ -195,7 +195,7 @@ class TestAskPlugins:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
 
         result = ask_plugins(config, [plugin1, plugin2])
@@ -236,7 +236,7 @@ class TestAskPlugins:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
 
         ask_plugins(config, [plugin1, plugin2])
@@ -269,7 +269,7 @@ class TestAskPlugins:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
 
         result = ask_plugins(config, [plugin])
@@ -294,7 +294,7 @@ class TestAskPlugins:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
 
         with pytest.raises(SystemExit) as exc_info:
@@ -311,27 +311,27 @@ class TestAskDocker:
         mock_confirm = mocker.patch("questionary.confirm")
         mock_confirm.return_value.ask.side_effect = [True, True]
 
-        docker, docker_infra = ask_docker()
+        docker, docker_dev_infra = ask_docker()
         assert docker is True
-        assert docker_infra is True
+        assert docker_dev_infra is True
 
     def test_returns_both_false(self, mocker: MockerFixture) -> None:
         """Verify ask_docker returns both False when not selected."""
         mock_confirm = mocker.patch("questionary.confirm")
         mock_confirm.return_value.ask.side_effect = [False, False]
 
-        docker, docker_infra = ask_docker()
+        docker, docker_dev_infra = ask_docker()
         assert docker is False
-        assert docker_infra is False
+        assert docker_dev_infra is False
 
     def test_returns_mixed(self, mocker: MockerFixture) -> None:
         """Verify ask_docker can return mixed values."""
         mock_confirm = mocker.patch("questionary.confirm")
         mock_confirm.return_value.ask.side_effect = [True, False]
 
-        docker, docker_infra = ask_docker()
+        docker, docker_dev_infra = ask_docker()
         assert docker is True
-        assert docker_infra is False
+        assert docker_dev_infra is False
 
     def test_raises_system_exit_on_first_cancel(self, mocker: MockerFixture) -> None:
         """Verify ask_docker raises SystemExit on first cancel."""
@@ -370,7 +370,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -395,7 +395,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -406,8 +406,12 @@ class TestRunPostGenerationSetup:
         uv_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "uv"]
         assert any(call[0][0] == ["uv", "sync"] for call in uv_calls)
 
-    def test_runs_docker_compose_when_docker_infra(self, tmp_path: Path, mocker: MockerFixture) -> None:
-        """Verify run_post_generation_setup runs docker compose when docker_infra is True and docker is available."""
+    def test_runs_docker_compose_when_docker_dev_infra(
+        self,
+        tmp_path: Path,
+        mocker: MockerFixture,
+    ) -> None:
+        """Verify run_post_generation_setup runs compose when docker_dev_infra is True and docker is available."""
         mocker.patch("src.cli.get_container_engine", return_value="docker")
         mock_run = mocker.patch("subprocess.run")
         mock_confirm = mocker.patch("questionary.confirm")
@@ -420,7 +424,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -430,7 +434,7 @@ class TestRunPostGenerationSetup:
         # Find the docker compose call
         docker_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "docker"]
         assert len(docker_calls) >= 1
-        assert "docker-compose.infra.yml" in docker_calls[0][0][0]
+        assert "docker-compose.dev-infra.yml" in docker_calls[0][0][0]
 
     def test_runs_podman_compose_when_docker_missing_and_podman_available(
         self,
@@ -450,7 +454,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -460,7 +464,7 @@ class TestRunPostGenerationSetup:
         # Find the podman compose call
         podman_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "podman"]
         assert len(podman_calls) >= 1
-        assert podman_calls[0][0][0] == ["podman", "compose", "-f", "docker-compose.infra.yml", "up", "-d"]
+        assert podman_calls[0][0][0] == ["podman", "compose", "-f", "docker-compose.dev-infra.yml", "up", "-d"]
 
     def test_prompts_and_uses_custom_engine_when_neither_available(
         self,
@@ -483,7 +487,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -493,7 +497,7 @@ class TestRunPostGenerationSetup:
         # Find the custom engine compose call
         custom_calls = [call for call in mock_run.call_args_list if call[0][0][0] == "nerdctl"]
         assert len(custom_calls) >= 1
-        assert custom_calls[0][0][0] == ["nerdctl", "compose", "-f", "docker-compose.infra.yml", "up", "-d"]
+        assert custom_calls[0][0][0] == ["nerdctl", "compose", "-f", "docker-compose.dev-infra.yml", "up", "-d"]
 
     def test_skips_infra_when_neither_available_and_user_declines(
         self,
@@ -514,7 +518,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -546,7 +550,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -570,7 +574,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=True,
+            docker_dev_infra=True,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -598,7 +602,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=True,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -623,7 +627,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
         mock_post_generate = mocker.Mock()
@@ -646,7 +650,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -677,7 +681,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -701,7 +705,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -728,7 +732,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -751,7 +755,7 @@ class TestRunPostGenerationSetup:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=True,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -779,7 +783,7 @@ class TestSubprocessFailures:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)
@@ -809,7 +813,7 @@ class TestSubprocessFailures:
             memory_store=MemoryStore.NONE,
             plugins=[],
             docker=False,
-            docker_infra=False,
+            docker_dev_infra=False,
         )
         generator = ProjectGenerator(config, tmp_path)
         generator._framework_generator = mocker.Mock(spec=LitestarGenerator)

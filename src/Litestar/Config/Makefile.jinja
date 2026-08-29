@@ -8,19 +8,19 @@ lint:
 	@echo "Linters completed. ✅"
 
 {% if database.value == "PostgreSQL" or database.value == "MySQL" or has_store %}
-INFRA_COMPOSE_FILE := docker-compose.infra.yml
+DEV_INFRA_COMPOSE_FILE := docker-compose.dev-infra.yml
 
-.PHONY: start-infra
-start-infra:
-	@echo "Starting infrastructure... 🔄"
-	docker compose -f $(INFRA_COMPOSE_FILE) up -d
-	@echo "Infrastructure started. ✅"
+.PHONY: start-dev-infra
+start-dev-infra:
+	@echo "Starting dev infrastructure... 🔄"
+	docker compose -f $(DEV_INFRA_COMPOSE_FILE) up -d
+	@echo "Dev infrastructure started. ✅"
 
-.PHONY: stop-infra
-stop-infra:
-	@echo "Stopping infrastructure... 🔄"
-	docker compose -f $(INFRA_COMPOSE_FILE) down
-	@echo "Infrastructure stopped. ✅"
+.PHONY: stop-dev-infra
+stop-dev-infra:
+	@echo "Stopping dev infrastructure... 🔄"
+	docker compose -f $(DEV_INFRA_COMPOSE_FILE) down
+	@echo "Dev infrastructure stopped. ✅"
 {% endif %}
 
 {% if docker %}

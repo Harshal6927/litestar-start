@@ -28,7 +28,7 @@ src/
     ├── Containers/      # Docker templates
     │   ├── Dockerfile.jinja
     │   ├── docker-compose.yml.jinja
-    │   └── docker-compose.infra.yml.jinja
+    │   └── docker-compose.dev-infra.yml.jinja
     └── Plugins/         # Optional plugin templates
         ├── __init__.py
         ├── AdvancedAlchemy/
@@ -191,7 +191,7 @@ Templates are rendered using Jinja2 with these settings:
 | `advanced_alchemy` | `bool` | AdvancedAlchemy plugin enabled |
 | `has_database` | `bool` | Any database selected |
 | `docker` | `bool` | Dockerfile requested |
-| `docker_infra` | `bool` | Infra compose requested |
+| `docker_dev_infra` | `bool` | Dev infra compose requested |
 
 ## Generated Project Structure
 
@@ -216,7 +216,7 @@ my_project/
 ├── README.md
 ├── Dockerfile             # If Docker selected
 ├── docker-compose.yml     # If Docker selected
-└── docker-compose.infra.yml  # If Docker infra selected
+└── docker-compose.dev-infra.yml  # If Docker dev infra selected
 ```
 
 ## Dependencies
