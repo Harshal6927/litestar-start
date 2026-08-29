@@ -2,8 +2,6 @@
 
 lint:
 	@echo "Running linters... 🔄"
-	uv run ruff check --fix
-	uv run ty check
 	uv run pre-commit install
 	uv run pre-commit run -a
 	@echo "Linters completed. ✅"

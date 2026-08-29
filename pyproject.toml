@@ -38,10 +38,10 @@ include = ["src"]
 
 [tool.ruff]
 fix = true
-format.preview = true
 line-length = 120
 lint.fixable = ["ALL"]
 lint.ignore = [
+    "RUF100",  # noqa-comments
     "CPY001",  # Missing copyright notice
     "D100",    # Undocumented public module
     "D104",    # Undocumented public package
@@ -53,7 +53,6 @@ lint.ignore = [
     "RUF067",  # `__init__` module should only contain docstrings
     "S404",    # Suspicious subprocess import
 ]
-lint.preview = true
 lint.pydocstyle.convention = "google"
 lint.select = ["ALL"]
 target-version = "py313"
@@ -65,4 +64,4 @@ markers = [
 
 
 [dependency-groups]
-dev = ["pre-commit>=4.6.2", "pytest>=9.1.1", "pytest-mock>=3.15.1", "ruff>=0.14.11", "ty>=0.0.11"]
+dev = ["pre-commit>=4.6.2", "pytest>=9.1.1", "pytest-mock>=3.15.1", "ruff>=0.16.5", "ty>=0.0.75"]
