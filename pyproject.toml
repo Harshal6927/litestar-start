@@ -58,6 +58,11 @@ lint.pydocstyle.convention = "google"
 lint.select = ["ALL"]
 target-version = "py313"
 
+[tool.pytest.ini_options]
+markers = [
+    "e2e: End-to-end integration tests requiring full project installation.",
+]
+
 
 [dependency-groups]
 dev = ["pre-commit>=4.6.2", "pytest>=9.1.1", "pytest-mock>=3.15.1", "ruff>=0.14.11", "ty>=0.0.11"]
