@@ -1,3 +1,5 @@
+CONTAINER_ENGINE ?= $(shell which podman 2>/dev/null || echo docker)
+
 .PHONY: lint
 lint:
 	@echo "Running linters... 🔄"
@@ -13,13 +15,13 @@ DEV_INFRA_COMPOSE_FILE := docker-compose.dev-infra.yml
 .PHONY: start-dev-infra
 start-dev-infra:
 	@echo "Starting dev infrastructure... 🔄"
-	docker compose -f $(DEV_INFRA_COMPOSE_FILE) up -d
+	$(CONTAINER_ENGINE) compose -f $(DEV_INFRA_COMPOSE_FILE) up -d
 	@echo "Dev infrastructure started. ✅"
 
 .PHONY: stop-dev-infra
 stop-dev-infra:
 	@echo "Stopping dev infrastructure... 🔄"
-	docker compose -f $(DEV_INFRA_COMPOSE_FILE) down
+	$(CONTAINER_ENGINE) compose -f $(DEV_INFRA_COMPOSE_FILE) down
 	@echo "Dev infrastructure stopped. ✅"
 {% endif %}
 
@@ -27,12 +29,12 @@ stop-dev-infra:
 .PHONY: start
 start:
 	@echo "Starting application with Docker... 🔄"
-	docker compose up -d
+	$(CONTAINER_ENGINE) compose up -d
 	@echo "Application started. ✅"
 
 .PHONY: stop
 stop:
-	@echo "Stopping application with Docker... 🔄
-	docker compose down
+	@echo "Stopping application with Docker... 🔄"
+	$(CONTAINER_ENGINE) compose down
 	@echo "Application stopped. ✅"
 {% endif %}

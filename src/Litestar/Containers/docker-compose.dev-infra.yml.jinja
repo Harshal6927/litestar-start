@@ -17,9 +17,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
-volumes:
-  {{ project_slug }}_postgres_dev_db: {}
   {% elif database.value == "MySQL" %}
   mysql:
     image: {{ db_config.docker_image }}
@@ -39,9 +36,6 @@ volumes:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
-volumes:
-  {{ project_slug }}_mysql_dev_db: {}
   {% endif %}
   {% if memory_store.value == "Redis" %}
   redis:
@@ -68,3 +62,12 @@ volumes:
       retries: 5
     restart: unless-stopped
   {% endif %}
+{% if database.value == "PostgreSQL" %}
+
+volumes:
+  {{ project_slug }}_postgres_dev_db: {}
+{% elif database.value == "MySQL" %}
+
+volumes:
+  {{ project_slug }}_mysql_dev_db: {}
+{% endif %}

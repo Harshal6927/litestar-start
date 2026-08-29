@@ -1,61 +1,52 @@
 """Application configuration."""
 
-import os
-from dataclasses import dataclass, field
 from functools import lru_cache
+import os
 from pathlib import Path
+
+import msgspec
 
 TRUTHY = ("true", "1", "yes")
 
 
-@dataclass
-class Settings:
+class Settings(msgspec.Struct):
     """Application settings."""
 
     # Application
-    APP_NAME: str = field(default_factory=lambda: os.getenv("APP_NAME", "{{ project_name }}"))
-    APP_ENV: str = field(default_factory=lambda: os.getenv("APP_ENV", "development"))
-    DEBUG: bool = field(default_factory=lambda: os.getenv("DEBUG", "true").lower() in TRUTHY)
+    APP_NAME: str = "{{ project_name }}"
+    APP_ENV: str = "development"
+    DEBUG: bool = True
 
     # Server
-    HOST: str = field(default_factory=lambda: os.getenv("HOST", "0.0.0.0"))
-    PORT: int = field(default_factory=lambda: int(os.getenv("PORT", "8000")))
-
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
 {% if has_database %}
+
     # Database
 {% if database.value == "PostgreSQL" %}
-    DATABASE_URL: str = field(
-        default_factory=lambda: os.getenv(
-            "DATABASE_URL",
-            "postgresql+psycopg://myuser:mypassword@localhost:5432/mydb"
-        ),
-    )
+    DATABASE_URL: str = "postgresql+psycopg://myuser:mypassword@localhost:5432/mydb"
 {% elif database.value == "SQLite" %}
-    DATABASE_URL: str = field(
-        default_factory=lambda: os.getenv(
-            "DATABASE_URL",
-            "sqlite+aiosqlite:///./app.db"
-        ),
-    )
+    DATABASE_URL: str = "sqlite+aiosqlite:///./app.db"
 {% elif database.value == "MySQL" %}
-    DATABASE_URL: str = field(
-        default_factory=lambda: os.getenv(
-            "DATABASE_URL",
-            "mysql+asyncmy://myuser:mypassword@localhost:3306/mydb"
-        ),
-    )
+    DATABASE_URL: str = "mysql+asyncmy://myuser:mypassword@localhost:3306/mydb"
 {% endif %}
 {% endif %}
-
 {% if has_store %}
+
     # Memory Store
-    REDIS_URL: str = field(
-        default_factory=lambda: os.getenv("REDIS_URL", "{{ store_config.default_url }}")
-    )
+    REDIS_URL: str = "{{ store_config.default_url }}"
 {% endif %}
 
     @classmethod
-    def from_env(cls, dotenv_filename: str) -> "Settings":
+    def from_env(cls, dotenv_filename: str = ".env") -> "Settings":
+        """Load settings from environment variables and optional dotenv file.
+
+        Args:
+            dotenv_filename: Path to the .env file.
+
+        Returns:
+            Configured Settings instance.
+        """
         env_file = (
             Path(dotenv_filename) if Path(dotenv_filename).is_absolute() else Path(f"{os.curdir}/{dotenv_filename}")
         )
@@ -71,9 +62,42 @@ class Settings:
             )
 
             load_dotenv(env_file, override=True)
-        return Settings()
+
+        return cls(
+            APP_NAME=os.getenv("APP_NAME", "{{ project_name }}"),
+            APP_ENV=os.getenv("APP_ENV", "development"),
+            DEBUG=os.getenv("DEBUG", "true").lower() in TRUTHY,
+            HOST=os.getenv("HOST", "0.0.0.0"),
+            PORT=int(os.getenv("PORT", "8000")),
+{% if has_database %}
+{% if database.value == "PostgreSQL" %}
+            DATABASE_URL=os.getenv(
+                "DATABASE_URL",
+                "postgresql+psycopg://myuser:mypassword@localhost:5432/mydb",
+            ),
+{% elif database.value == "SQLite" %}
+            DATABASE_URL=os.getenv(
+                "DATABASE_URL",
+                "sqlite+aiosqlite:///./app.db",
+            ),
+{% elif database.value == "MySQL" %}
+            DATABASE_URL=os.getenv(
+                "DATABASE_URL",
+                "mysql+asyncmy://myuser:mypassword@localhost:3306/mydb",
+            ),
+{% endif %}
+{% endif %}
+{% if has_store %}
+            REDIS_URL=os.getenv("REDIS_URL", "{{ store_config.default_url }}"),
+{% endif %}
+        )
 
 
 @lru_cache(maxsize=1, typed=True)
 def get_settings() -> Settings:
+    """Get cached application settings.
+
+    Returns:
+        The singleton Settings instance.
+    """
     return Settings.from_env(dotenv_filename=".env")
