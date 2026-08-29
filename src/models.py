@@ -70,11 +70,16 @@ class ProjectConfig(msgspec.Struct):
         return plugin_id in self.plugins
 
     @property
-    def needs_docker_dev_infra(self) -> bool:
-        """Check if docker-compose.dev-infra.yml should be generated."""
+    def can_use_docker_dev_infra(self) -> bool:
+        """Check if the selected configuration supports containerized dev infrastructure."""
         has_db = self.database in {Database.POSTGRESQL, Database.MYSQL}
         has_store = self.memory_store in {MemoryStore.REDIS, MemoryStore.VALKEY}
-        return self.docker_dev_infra and (has_db or has_store)
+        return has_db or has_store
+
+    @property
+    def needs_docker_dev_infra(self) -> bool:
+        """Check if docker-compose.dev-infra.yml should be generated."""
+        return self.docker_dev_infra and self.can_use_docker_dev_infra
 
 
 class DatabaseConfig(msgspec.Struct):

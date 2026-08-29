@@ -91,6 +91,23 @@ class TestProjectConfig:
         assert config.has_plugin("litestar_saq") is False
         assert config.has_plugin("nonexistent") is False
 
+    def test_slug_removes_special_characters(self) -> None:
+        """Verify slug removes special characters like @, #, $."""
+        config = ProjectConfig(
+            name="my@project#name",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_dev_infra=False,
+        )
+        assert config.slug == "myprojectname"
+
+
+class TestProjectConfigDockerDevInfra:
+    """Tests for ProjectConfig docker dev infra properties."""
+
     def test_needs_docker_dev_infra_false_when_docker_dev_infra_disabled(self) -> None:
         """Verify needs_docker_dev_infra is False when docker_dev_infra flag is False."""
         config = ProjectConfig(
@@ -195,10 +212,23 @@ class TestProjectConfig:
         )
         assert config.needs_docker_dev_infra is True
 
-    def test_slug_removes_special_characters(self) -> None:
-        """Verify slug removes special characters like @, #, $."""
+    def test_can_use_docker_dev_infra_false_with_sqlite_and_none(self) -> None:
+        """Verify can_use_docker_dev_infra is False when database is SQLite and memory_store is None."""
         config = ProjectConfig(
-            name="my@project#name",
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.SQLITE,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_dev_infra=False,
+        )
+        assert config.can_use_docker_dev_infra is False
+
+    def test_can_use_docker_dev_infra_false_with_none_and_none(self) -> None:
+        """Verify can_use_docker_dev_infra is False when both database and memory_store are None."""
+        config = ProjectConfig(
+            name="Test",
             framework=Framework.LITESTAR,
             database=Database.NONE,
             memory_store=MemoryStore.NONE,
@@ -206,7 +236,59 @@ class TestProjectConfig:
             docker=False,
             docker_dev_infra=False,
         )
-        assert config.slug == "myprojectname"
+        assert config.can_use_docker_dev_infra is False
+
+    def test_can_use_docker_dev_infra_true_with_postgresql(self) -> None:
+        """Verify can_use_docker_dev_infra is True when database is PostgreSQL."""
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.POSTGRESQL,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_dev_infra=False,
+        )
+        assert config.can_use_docker_dev_infra is True
+
+    def test_can_use_docker_dev_infra_true_with_mysql(self) -> None:
+        """Verify can_use_docker_dev_infra is True when database is MySQL."""
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.MYSQL,
+            memory_store=MemoryStore.NONE,
+            plugins=[],
+            docker=False,
+            docker_dev_infra=False,
+        )
+        assert config.can_use_docker_dev_infra is True
+
+    def test_can_use_docker_dev_infra_true_with_redis(self) -> None:
+        """Verify can_use_docker_dev_infra is True when memory_store is Redis."""
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.SQLITE,
+            memory_store=MemoryStore.REDIS,
+            plugins=[],
+            docker=False,
+            docker_dev_infra=False,
+        )
+        assert config.can_use_docker_dev_infra is True
+
+    def test_can_use_docker_dev_infra_true_with_valkey(self) -> None:
+        """Verify can_use_docker_dev_infra is True when memory_store is Valkey."""
+        config = ProjectConfig(
+            name="Test",
+            framework=Framework.LITESTAR,
+            database=Database.NONE,
+            memory_store=MemoryStore.VALKEY,
+            plugins=[],
+            docker=False,
+            docker_dev_infra=False,
+        )
+        assert config.can_use_docker_dev_infra is True
 
     def test_slug_handles_digit_prefix(self) -> None:
         """Verify slug adds underscore prefix for digit-starting names."""

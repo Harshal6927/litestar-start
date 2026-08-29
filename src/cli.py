@@ -16,7 +16,8 @@ from src.utils import get_container_engine, validate_project_name
 
 __all__ = [
     "ask_database",
-    "ask_docker",
+    "ask_docker_dev_infra",
+    "ask_dockerfile",
     "ask_framework",
     "ask_memory_store",
     "ask_plugins",
@@ -181,14 +182,14 @@ def ask_plugins(config: ProjectConfig, discovered_plugins: list[Plugin]) -> list
     return result
 
 
-def ask_docker() -> tuple[bool, bool]:
-    """Ask for Docker configuration.
+def ask_dockerfile() -> bool:
+    """Ask whether to generate a Dockerfile for the application.
 
     Returns:
-        A tuple of (generate_dockerfile, generate_docker_dev_infra).
+        True if Dockerfile should be generated, False otherwise.
 
     Raises:
-        SystemExit: If the user cancels the operation (e.g., presses Ctrl+C).
+        SystemExit: If the user cancels the operation.
 
     """
     docker = questionary.confirm(
@@ -200,6 +201,19 @@ def ask_docker() -> tuple[bool, bool]:
         console.print("\n[yellow]Cancelled.[/yellow]")
         raise SystemExit(0)
 
+    return docker
+
+
+def ask_docker_dev_infra() -> bool:
+    """Ask whether to generate docker-compose.dev-infra.yml for local development.
+
+    Returns:
+        True if dev infra compose file should be generated, False otherwise.
+
+    Raises:
+        SystemExit: If the user cancels the operation.
+
+    """
     docker_dev_infra = questionary.confirm(
         "Generate docker-compose.dev-infra.yml for local development (database, etc.)?",
         default=True,
@@ -209,7 +223,7 @@ def ask_docker() -> tuple[bool, bool]:
         console.print("\n[yellow]Cancelled.[/yellow]")
         raise SystemExit(0)
 
-    return docker, docker_dev_infra
+    return docker_dev_infra
 
 
 def run_post_generation_setup(generator: ProjectGenerator, output_dir: Path) -> None:
@@ -331,11 +345,14 @@ def main() -> None:
         plugins = ask_plugins(config, discovered_plugins)
         config.plugins = plugins
 
-        docker, docker_dev_infra = ask_docker()
-        config.docker = docker
-        config.docker_dev_infra = docker_dev_infra
+        config.docker = ask_dockerfile()
+        if config.can_use_docker_dev_infra:
+            config.docker_dev_infra = ask_docker_dev_infra()
+        else:
+            config.docker_dev_infra = False
 
         # Show summary
+        dev_infra_summary = ("Yes" if config.docker_dev_infra else "No") if config.can_use_docker_dev_infra else "N/A"
         console.print()
         console.print(
             Panel.fit(
@@ -345,7 +362,7 @@ def main() -> None:
                 f"[bold]Memory Store:[/bold] {config.memory_store.value}\n"
                 f"[bold]Plugins:[/bold] {', '.join(config.plugins) or 'None'}\n"
                 f"[bold]Docker:[/bold] {'Yes' if config.docker else 'No'}\n"
-                f"[bold]Docker Dev Infra:[/bold] {'Yes' if config.docker_dev_infra else 'No'}",
+                f"[bold]Docker Dev Infra:[/bold] {dev_infra_summary}",
                 title="Configuration Summary",
             ),
         )

@@ -8,7 +8,8 @@ from pytest_mock import MockerFixture
 
 from src.cli import (
     ask_database,
-    ask_docker,
+    ask_docker_dev_infra,
+    ask_dockerfile,
     ask_framework,
     ask_memory_store,
     ask_plugins,
@@ -303,53 +304,62 @@ class TestAskPlugins:
         assert exc_info.value.code == 0
 
 
-class TestAskDocker:
-    """Tests for ask_docker function."""
+class TestAskDockerfile:
+    """Tests for ask_dockerfile function."""
 
-    def test_returns_both_true(self, mocker: MockerFixture) -> None:
-        """Verify ask_docker returns both True when selected."""
+    def test_returns_true(self, mocker: MockerFixture) -> None:
+        """Verify ask_dockerfile returns True when selected."""
         mock_confirm = mocker.patch("questionary.confirm")
-        mock_confirm.return_value.ask.side_effect = [True, True]
+        mock_confirm.return_value.ask.return_value = True
 
-        docker, docker_dev_infra = ask_docker()
-        assert docker is True
-        assert docker_dev_infra is True
+        result = ask_dockerfile()
+        assert result is True
 
-    def test_returns_both_false(self, mocker: MockerFixture) -> None:
-        """Verify ask_docker returns both False when not selected."""
+    def test_returns_false(self, mocker: MockerFixture) -> None:
+        """Verify ask_dockerfile returns False when not selected."""
         mock_confirm = mocker.patch("questionary.confirm")
-        mock_confirm.return_value.ask.side_effect = [False, False]
+        mock_confirm.return_value.ask.return_value = False
 
-        docker, docker_dev_infra = ask_docker()
-        assert docker is False
-        assert docker_dev_infra is False
+        result = ask_dockerfile()
+        assert result is False
 
-    def test_returns_mixed(self, mocker: MockerFixture) -> None:
-        """Verify ask_docker can return mixed values."""
-        mock_confirm = mocker.patch("questionary.confirm")
-        mock_confirm.return_value.ask.side_effect = [True, False]
-
-        docker, docker_dev_infra = ask_docker()
-        assert docker is True
-        assert docker_dev_infra is False
-
-    def test_raises_system_exit_on_first_cancel(self, mocker: MockerFixture) -> None:
-        """Verify ask_docker raises SystemExit on first cancel."""
+    def test_raises_system_exit_on_cancel(self, mocker: MockerFixture) -> None:
+        """Verify ask_dockerfile raises SystemExit on cancel."""
         mock_confirm = mocker.patch("questionary.confirm")
         mock_confirm.return_value.ask.return_value = None
 
         with pytest.raises(SystemExit) as exc_info:
-            ask_docker()
+            ask_dockerfile()
 
         assert exc_info.value.code == 0
 
-    def test_raises_system_exit_on_second_cancel(self, mocker: MockerFixture) -> None:
-        """Verify ask_docker raises SystemExit on second cancel."""
+
+class TestAskDockerDevInfra:
+    """Tests for ask_docker_dev_infra function."""
+
+    def test_returns_true(self, mocker: MockerFixture) -> None:
+        """Verify ask_docker_dev_infra returns True when selected."""
         mock_confirm = mocker.patch("questionary.confirm")
-        mock_confirm.return_value.ask.side_effect = [True, None]
+        mock_confirm.return_value.ask.return_value = True
+
+        result = ask_docker_dev_infra()
+        assert result is True
+
+    def test_returns_false(self, mocker: MockerFixture) -> None:
+        """Verify ask_docker_dev_infra returns False when not selected."""
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = False
+
+        result = ask_docker_dev_infra()
+        assert result is False
+
+    def test_raises_system_exit_on_cancel(self, mocker: MockerFixture) -> None:
+        """Verify ask_docker_dev_infra raises SystemExit on cancel."""
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = None
 
         with pytest.raises(SystemExit) as exc_info:
-            ask_docker()
+            ask_docker_dev_infra()
 
         assert exc_info.value.code == 0
 
@@ -834,7 +844,8 @@ class TestMain:
         mocker.patch("src.cli.ask_memory_store", return_value=MemoryStore.NONE)
         mocker.patch("src.cli.discover_plugins", return_value=[])
         mocker.patch("src.cli.ask_plugins", return_value=[])
-        mocker.patch("src.cli.ask_docker", return_value=(False, False))
+        mocker.patch("src.cli.ask_dockerfile", return_value=False)
+        mock_dev_infra = mocker.patch("src.cli.ask_docker_dev_infra")
 
         mock_confirm = mocker.patch("questionary.confirm")
         mock_confirm.return_value.ask.return_value = True  # Confirm generation
@@ -849,6 +860,7 @@ class TestMain:
 
         main()
 
+        mock_dev_infra.assert_not_called()
         mock_generator_cls.assert_called_once()
         mock_generator.generate.assert_called_once()
         mock_post_gen.assert_called_once()
@@ -862,7 +874,7 @@ class TestMain:
         mocker.patch("src.cli.ask_memory_store", return_value=MemoryStore.NONE)
         mocker.patch("src.cli.discover_plugins", return_value=[])
         mocker.patch("src.cli.ask_plugins", return_value=[])
-        mocker.patch("src.cli.ask_docker", return_value=(False, False))
+        mocker.patch("src.cli.ask_dockerfile", return_value=False)
 
         mock_confirm = mocker.patch("questionary.confirm")
         mock_confirm.return_value.ask.return_value = False  # Decline
@@ -871,6 +883,96 @@ class TestMain:
             main()
 
         assert exc_info.value.code == 0
+
+    def test_main_skips_docker_dev_infra_for_sqlite_without_memory_store(
+        self,
+        tmp_path: Path,
+        mocker: MockerFixture,
+    ) -> None:
+        """Verify main() does not prompt for docker dev infra when SQLite and no memory store are selected."""
+        mocker.patch("src.cli.print_banner")
+        mocker.patch("src.cli.ask_project_name", return_value="test-project")
+        mocker.patch("src.cli.ask_framework", return_value=Framework.LITESTAR)
+        mocker.patch("src.cli.ask_database", return_value=Database.SQLITE)
+        mocker.patch("src.cli.ask_memory_store", return_value=MemoryStore.NONE)
+        mocker.patch("src.cli.discover_plugins", return_value=[])
+        mocker.patch("src.cli.ask_plugins", return_value=[])
+        mocker.patch("src.cli.ask_dockerfile", return_value=True)
+        mock_dev_infra = mocker.patch("src.cli.ask_docker_dev_infra")
+
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = True
+
+        mock_generator_cls = mocker.patch("src.cli.ProjectGenerator")
+        mocker.patch("src.cli.Path.cwd", return_value=tmp_path)
+        mocker.patch("src.cli.run_post_generation_setup")
+
+        main()
+
+        mock_dev_infra.assert_not_called()
+        config: ProjectConfig = mock_generator_cls.call_args[0][0]
+        assert config.docker is True
+        assert config.docker_dev_infra is False
+
+    def test_main_prompts_docker_dev_infra_when_database_supports_it(
+        self,
+        tmp_path: Path,
+        mocker: MockerFixture,
+    ) -> None:
+        """Verify main() prompts for docker dev infra when PostgreSQL is selected."""
+        mocker.patch("src.cli.print_banner")
+        mocker.patch("src.cli.ask_project_name", return_value="test-project")
+        mocker.patch("src.cli.ask_framework", return_value=Framework.LITESTAR)
+        mocker.patch("src.cli.ask_database", return_value=Database.POSTGRESQL)
+        mocker.patch("src.cli.ask_memory_store", return_value=MemoryStore.NONE)
+        mocker.patch("src.cli.discover_plugins", return_value=[])
+        mocker.patch("src.cli.ask_plugins", return_value=[])
+        mocker.patch("src.cli.ask_dockerfile", return_value=True)
+        mock_dev_infra = mocker.patch("src.cli.ask_docker_dev_infra", return_value=True)
+
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = True
+
+        mock_generator_cls = mocker.patch("src.cli.ProjectGenerator")
+        mocker.patch("src.cli.Path.cwd", return_value=tmp_path)
+        mocker.patch("src.cli.run_post_generation_setup")
+
+        main()
+
+        mock_dev_infra.assert_called_once()
+        config: ProjectConfig = mock_generator_cls.call_args[0][0]
+        assert config.docker is True
+        assert config.docker_dev_infra is True
+
+    def test_main_prompts_docker_dev_infra_when_memory_store_supports_it(
+        self,
+        tmp_path: Path,
+        mocker: MockerFixture,
+    ) -> None:
+        """Verify main() prompts for docker dev infra when Valkey is selected with SQLite."""
+        mocker.patch("src.cli.print_banner")
+        mocker.patch("src.cli.ask_project_name", return_value="test-project")
+        mocker.patch("src.cli.ask_framework", return_value=Framework.LITESTAR)
+        mocker.patch("src.cli.ask_database", return_value=Database.SQLITE)
+        mocker.patch("src.cli.ask_memory_store", return_value=MemoryStore.VALKEY)
+        mocker.patch("src.cli.discover_plugins", return_value=[])
+        mocker.patch("src.cli.ask_plugins", return_value=[])
+        mocker.patch("src.cli.ask_dockerfile", return_value=False)
+        mock_dev_infra = mocker.patch("src.cli.ask_docker_dev_infra", return_value=False)
+
+        mock_confirm = mocker.patch("questionary.confirm")
+        mock_confirm.return_value.ask.return_value = True
+
+        mock_generator_cls = mocker.patch("src.cli.ProjectGenerator")
+        mocker.patch("src.cli.Path.cwd", return_value=tmp_path)
+        mocker.patch("src.cli.run_post_generation_setup")
+
+        main()
+
+        mock_dev_infra.assert_called_once()
+        config: ProjectConfig = mock_generator_cls.call_args[0][0]
+        assert config.docker is False
+        assert config.docker_dev_infra is False
 
     def test_main_keyboard_interrupt(self, mocker: MockerFixture) -> None:
         """Verify main() handles KeyboardInterrupt gracefully."""
